@@ -43,8 +43,34 @@ python3 -m http.server 8000
 | `support.js`, `doc-page.js`, `image-slot.js` | Claude Design canvas runtime |
 | `uploads/` | Raw source material (unprocessed GeoJSON, video, imagery) |
 | `tools/` | Build script that derives the 3D building layer from the raw export |
+| `v2/` | Competition-board style test — same data, redrawn cartography |
 
 External runtime dependencies (React, MapLibre GL, Babel standalone) load from
 public CDNs; map tiles come from OpenStreetMap and OpenFreeMap.
 
 `.nojekyll` is present so GitHub Pages serves the `_ds/` directory verbatim.
+
+## v2 — competition-board style test
+
+`v2/index.html` is a styling experiment served at
+<https://creez-studio.github.io/nedumangad-digital-atlas/v2/>. It shares every
+asset with the main build through a `<base href="../">` tag, so only the drawing
+changes — there is no duplicated data.
+
+What differs from the main atlas:
+
+- **Road widths** are a zoom ramp over real carriageway metres per hierarchy
+  level (NH 15 m → local 4 m) with a pixel floor, instead of one fixed pixel
+  width that reads fat when zoomed out and hair-thin when zoomed in.
+- **Casing plus fill** as two whole layers rather than a single stroke, so all
+  casings paint before any fill and shared junctions merge cleanly instead of
+  stacking seams.
+- **`line-sort-key` by hierarchy**, so a lane can never paint across a highway —
+  the main cause of the clipped-looking junctions.
+- **Paper palette**: the raster basemap is washed almost to white, water is
+  desaturated to slate, building massing is near-white card, and the two highway
+  grades carry the coral accent so the main axis reads at a glance.
+
+Note for anyone editing the widths: `line-width` will not accept runtime `+`/`*`
+next to a zoom `interpolate`, so all arithmetic is done in JS and the style only
+ever sees a plain ramp over per-class constants.
