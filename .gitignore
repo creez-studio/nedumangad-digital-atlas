@@ -1,1 +1,6 @@
 .DS_Store
+
+# Editor state and raw source bundle — the raw uploads ship as a GitHub Release asset (see v1.0)
+uploads/
+.image-slots.state.json
+.thumbnail
