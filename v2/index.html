@@ -70,14 +70,16 @@
   </div>
 
   <sc-if value="{{ showFold }}" hint-placeholder-val="{{ false }}">
-    <div style="position:fixed;top:70px;right:44px;z-index:7;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none">
-      <button onClick="{{ onWater }}" style="pointer-events:auto;display:flex;align-items:center;gap:9px;background:{{ waterBg }};color:{{ waterFg }};border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);padding:9px 13px;font-family:var(--font-body);font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">
-        <span style="width:17px;height:0;border-top:3px solid {{ waterDot }};display:inline-block"></span>{{ waterLabel }}
-      </button>
-      <button onClick="{{ onProposed }}" style="pointer-events:auto;display:flex;align-items:center;gap:9px;background:{{ proposedBg }};color:{{ proposedFg }};border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);padding:9px 13px;font-family:var(--font-body);font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">
-        <span style="width:17px;height:0;border-top:3px dashed {{ proposedDot }};display:inline-block"></span>{{ proposedLabel }}
-      </button>
-      <button onClick="{{ onHideUI }}" style="pointer-events:auto;display:flex;align-items:center;gap:9px;background:rgba(247,246,243,.95);color:var(--color-text);border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);padding:9px 13px;font-family:var(--font-body);font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer"><span style="font-size:13px;line-height:1">{{ foldGlyph }}</span>{{ foldLabel }}</button>
+    <!-- Feature bar: one horizontal rail of pill toggles instead of a stack of
+         boxes in the corner, so the map keeps its top-right quarter. -->
+    <div style="position:fixed;top:64px;right:44px;z-index:7;display:flex;align-items:center;gap:6px;padding:5px;background:rgba(250,249,246,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1.5px solid var(--color-divider);border-radius:999px;box-shadow:var(--shadow-sm);pointer-events:auto">
+      <sc-for list="{{ features }}" as="ft" hint-placeholder-count="4">
+        <button onClick="{{ ft.onToggle }}" title="{{ ft.title }}" style="display:flex;align-items:center;gap:7px;background:{{ ft.bg }};color:{{ ft.fg }};border:none;border-radius:999px;padding:7px 13px;font-family:var(--font-body);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s">
+          <span style="width:14px;height:0;border-top:{{ ft.rule }};display:inline-block;opacity:{{ ft.dotOp }}"></span>{{ ft.label }}
+        </button>
+      </sc-for>
+      <div style="width:1px;height:20px;background:var(--color-divider);margin:0 2px"></div>
+      <button onClick="{{ onHideUI }}" title="Hide every panel for a clean map" style="display:flex;align-items:center;gap:7px;background:{{ cleanBg }};color:{{ cleanFg }};border:none;border-radius:999px;padding:7px 13px;font-family:var(--font-body);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;white-space:nowrap"><span style="font-size:12px;line-height:1">{{ foldGlyph }}</span>{{ foldLabel }}</button>
     </div>
   </sc-if>
 
@@ -199,11 +201,46 @@
 
   <sc-if value="{{ inChapter }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;left:44px;top:84px;bottom:120px;z-index:4;width:300px;pointer-events:none;display:flex;flex-direction:column;gap:12px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none">
-      <div style="background:rgba(247,246,243,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--color-divider);padding:18px 20px;box-shadow:var(--shadow-sm);pointer-events:auto;flex-shrink:0;animation:atlasRise .6s both">
-        <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent);margin-bottom:4px">{{ chKicker }}</div>
-        <div style="font-family:var(--font-heading);font-weight:600;font-size:21px;letter-spacing:-.01em">{{ chTitle }}</div>
-        <div style="font-size:12.5px;line-height:1.5;color:var(--color-neutral-700);margin-top:6px">{{ chDesc }}</div>
+      <div style="background:rgba(250,249,246,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1.5px solid var(--color-divider);border-radius:14px;box-shadow:var(--shadow-sm);pointer-events:auto;flex-shrink:0;animation:atlasRise .6s both;overflow:hidden">
+        <button onClick="{{ fold.about }}" style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;width:100%;border:none;background:none;cursor:pointer;padding:16px 18px;font-family:var(--font-body);text-align:left">
+          <span>
+            <span style="display:block;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent);margin-bottom:3px">{{ chKicker }}</span>
+            <span style="display:block;font-family:var(--font-heading);font-weight:600;font-size:19px;letter-spacing:-.01em;color:var(--color-text)">{{ chTitle }}</span>
+          </span>
+          <span style="font-size:11px;color:var(--color-neutral-500);margin-top:14px">{{ chev.about }}</span>
+        </button>
+        <sc-if value="{{ open.about }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:12.5px;line-height:1.5;color:var(--color-neutral-700);padding:0 18px 16px">{{ chDesc }}</div>
+        </sc-if>
       </div>
+
+      <!-- Feature index: headings only until opened, so the rail stays short -->
+      <sc-if value="{{ showIndex }}" hint-placeholder-val="{{ false }}">
+        <div style="background:rgba(250,249,246,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1.5px solid var(--color-divider);border-radius:14px;box-shadow:var(--shadow-sm);pointer-events:auto;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;animation:atlasRise .6s .14s both">
+          <sc-for list="{{ indexTabs }}" as="tb" hint-placeholder-count="2">
+            <div style="border-top:{{ tb.rule }}">
+              <button onClick="{{ tb.onFold }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;border:none;background:none;cursor:pointer;padding:13px 18px;font-family:var(--font-body)">
+                <span style="display:flex;align-items:center;gap:9px">
+                  <span style="width:8px;height:8px;border-radius:50%;background:{{ tb.dot }};display:inline-block"></span>
+                  <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700)">{{ tb.label }}</span>
+                  <span style="font-size:10.5px;color:var(--color-neutral-500)">{{ tb.count }}</span>
+                </span>
+                <span style="font-size:11px;color:var(--color-neutral-500)">{{ tb.chev }}</span>
+              </button>
+              <sc-if value="{{ tb.open }}" hint-placeholder-val="{{ false }}">
+                <div style="max-height:30vh;overflow-y:auto;padding:0 8px 10px">
+                  <sc-for list="{{ tb.items }}" as="it" hint-placeholder-count="4">
+                    <button onClick="{{ it.onPick }}" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;border:none;background:{{ it.bg }};border-radius:9px;cursor:pointer;padding:8px 10px;font-family:var(--font-body);text-align:left">
+                      <span style="font-size:12.5px;color:var(--color-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0">{{ it.name }}</span>
+                      <span style="font-size:10.5px;color:var(--color-neutral-500);flex-shrink:0">{{ it.meta }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
 
       <sc-if value="{{ isCh2 }}" hint-placeholder-val="{{ false }}">
         <div style="background:rgba(247,246,243,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);pointer-events:auto;flex-shrink:0;display:flex;flex-direction:column;animation:atlasRise .6s .1s both">
@@ -521,7 +558,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;cameraDrift&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Opening&quot;}, &quot;basemapOpacity&quot;: {&quot;editor&quot;: &quot;range&quot;, &quot;default&quot;: 0.5, &quot;min&quot;: 0, &quot;max&quot;: 1, &quot;step&quot;: 0.05, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Cartography&quot;}}">
 class Component extends DCLogic {
-  state = { scene: 'landing', mapStatus: 'Loading cartography…', stage: 0, showFacts: false, detail: null, counts: {}, period: 0, route: null, tourist: null, dest: null, folded: {}, mapReady: false, proposedOnly: false, hideUI: false, videoMode: false, videoT: 0, intro: false, introLabel: '', introSub: '', layers: { junctions: true, stand: true, stops: true, rings: false, landmarks: true, routes: true, wards: true, tourist: true, tvmRadius: true, markets: true, dests: true, contours: true, contourRoads: false, wardsTopo: true, cb0: true, cb1: true, cb2: true, cb3: true, water: true, buildings: true } };
+  state = { scene: 'landing', mapStatus: 'Loading cartography…', stage: 0, showFacts: false, detail: null, counts: {}, period: 0, route: null, tourist: null, dest: null, folded: {}, mapReady: false, proposedOnly: false, hideUI: false, videoMode: false, videoT: 0, intro: false, introLabel: '', introSub: '', layers: { junctions: true, stand: true, stops: true, rings: false, landmarks: true, routes: true, wards: true, tourist: true, tvmRadius: true, markets: true, dests: true, contours: true, contourRoads: false, wardsTopo: true, cb0: true, cb1: true, cb2: true, cb3: true, water: true, buildings: true, vegetation: true } };
   RIVER_INFO = { 'Killi River': {
     also: 'Killiyar · കിള്ളിയാർ', part: 'Karamana River basin',
     rises: 'Theerthankara, near Panavur — Nedumangad taluk',
@@ -620,14 +657,20 @@ class Component extends DCLogic {
     let imgCard = null;
     if ((s.scene === 'ch3' || s.scene === 'ch4') && tsel) imgCard = { img: tsel.img, name: tsel.name, meta: tsel.d + ' · ' + tsel.note };
     else if (s.scene === 'ch3' && s.detail && s.detail.img) imgCard = { img: s.detail.img, name: s.detail.title, meta: s.detail.kicker };
-    const foldToggle = (k) => () => this.setState((st) => ({ folded: { ...st.folded, [k]: !st.folded[k] } }));
+    // `startClosed` flips the default: those panels read as collapsed until a
+    // click sets folded[k] to false, so a fresh chapter shows headings only.
+    const foldToggle = (k, startClosed) => () => this.setState((st) => ({
+      folded: { ...st.folded, [k]: startClosed ? st.folded[k] === false : !st.folded[k] },
+    }));
     const uiHidden = s.hideUI || s.videoMode;
     return {
       isLanding: s.scene === 'landing', isContext: s.scene === 'context', isMain: s.scene === 'main',
       inChapter: !!ch && !uiHidden, isCh2: s.scene === 'ch2' && !uiHidden, isCh2Scene: s.scene === 'ch2', isCh3: s.scene === 'ch3', isCh4: s.scene === 'ch4', isCh5: s.scene === 'ch5' && !uiHidden,
-      open: { timeline: !f.timeline, layers: !f.layers, roads: !f.roads, corridors: !f.corridors, tourist: !f.tourist, dests: !f.dests },
-      chev: { timeline: f.timeline ? '▸' : '▾', layers: f.layers ? '▸' : '▾', roads: f.roads ? '▸' : '▾', corridors: f.corridors ? '▸' : '▾', tourist: f.tourist ? '▸' : '▾', dests: f.dests ? '▸' : '▾' },
-      fold: { timeline: foldToggle('timeline'), layers: foldToggle('layers'), roads: foldToggle('roads'), corridors: foldToggle('corridors'), tourist: foldToggle('tourist'), dests: foldToggle('dests') },
+      open: { timeline: !f.timeline, layers: !f.layers, roads: !f.roads, corridors: !f.corridors, tourist: !f.tourist, dests: !f.dests, about: !f.about },
+      chev: { timeline: f.timeline ? '▸' : '▾', layers: f.layers ? '▸' : '▾', roads: f.roads ? '▸' : '▾', corridors: f.corridors ? '▸' : '▾', tourist: f.tourist ? '▸' : '▾', dests: f.dests ? '▸' : '▾', about: f.about ? '▸' : '▾' },
+      fold: { timeline: foldToggle('timeline'), layers: foldToggle('layers'), roads: foldToggle('roads'), corridors: foldToggle('corridors'), tourist: foldToggle('tourist'), dests: foldToggle('dests'), about: foldToggle('about') },
+      showIndex: this.inChapterScene() && s.scene !== 'ch2',
+      indexTabs: this.indexTabs(foldToggle),
       routes: this.ROUTES.map((r) => ({ name: r.name, dir: r.dir, color: r.color, bar: s.route === r.id ? '#201e1d' : 'transparent', bg: s.route === r.id ? 'rgba(32,30,29,.07)' : 'transparent', fg: '#201e1d', onPick: () => this.pickRoute(r.id) })),
       tourist: this.TOURIST.map((t) => ({ name: t.name, d: t.d, bg: s.tourist === t.key ? 'rgba(91,107,60,.14)' : 'none', onPick: () => this.pickTourist(t) })),
       dests: this.DESTS.map((d) => ({ name: d.name, cat: d.cat, color: this.DEST_COLOR[d.cat], trip: d.km + ' km · ' + d.min + ' min', bar: s.dest === d.id ? '#201e1d' : 'transparent', bg: s.dest === d.id ? 'rgba(32,30,29,.07)' : 'none', onPick: () => this.openDest(d.id) })),
@@ -637,12 +680,8 @@ class Component extends DCLogic {
       showFold: this.inChapterScene() && s.mapReady,
       showMapTools: this.inChapterScene() && s.mapReady && !s.videoMode,
       hideUI: s.hideUI, onHideUI: () => this.toggleHideUI(), foldLabel: s.hideUI ? 'Show panels' : 'Clean map', foldGlyph: s.hideUI ? '▣' : '▤',
-      waterOn: s.layers.water, onWater: () => this.toggleWater(),
-      waterBg: s.layers.water ? '#7595AC' : 'rgba(247,246,243,.95)', waterFg: s.layers.water ? '#F7F6F3' : '#201e1d', waterDot: s.layers.water ? '#F7F6F3' : '#7595AC',
-      waterLabel: s.layers.water ? 'Rivers · on' : 'Rivers & water',
-      proposedOn: s.proposedOnly, onProposed: () => this.toggleProposed(),
-      proposedBg: s.proposedOnly ? '#8E1F12' : 'rgba(247,246,243,.95)', proposedFg: s.proposedOnly ? '#F7F6F3' : '#201e1d', proposedDot: s.proposedOnly ? '#F7F6F3' : '#ec3013',
-      proposedLabel: s.proposedOnly ? 'Proposed · ORR' : 'Proposed roads',
+      cleanBg: s.hideUI ? '#201e1d' : 'transparent', cleanFg: s.hideUI ? '#FBFAF8' : '#201e1d',
+      features: this.featureBar(),
       videoMode: s.videoMode, onOpenVideo: () => this.openVideoMode(), onCloseVideo: () => this.closeVideoMode(),
       onScrub: (e) => this.scrubVideo(parseFloat(e.target.value) / 1000), videoTVal: Math.round(s.videoT * 1000),
       videoYear: Math.round(1600 + s.videoT * 426), videoPhase: ['Forest trails & footpaths', 'Roads, trade & the market', 'The modern network'][Math.min(2, Math.floor(s.videoT * 3))],
@@ -689,6 +728,71 @@ class Component extends DCLogic {
       detailRows: s.detail ? s.detail.rows : [],
       closeDetail: () => this.closeSelection(),
     };
+  }
+
+  // Junction and ward indexes. Both stay collapsed to a heading until asked
+  // for — the point is a way in to a named feature, not a wall of list.
+  indexTabs(foldToggle) {
+    const s = this.state, f = s.folded, out = [];
+    const notes = this.junctionNotes || {};
+
+    const jf = ((this.datasets || {}).junctions || {}).fc;
+    if (jf && jf.features.length) {
+      const items = jf.features.map((ft) => {
+        const p = ft.properties || {};
+        const c = ft.geometry.coordinates;
+        const note = notes[p.osm_id] || {};
+        return {
+          name: p.name || 'Unnamed junction',
+          meta: '',
+          bg: this._selKey === 'jn:' + c.join(',') ? 'rgba(236,48,19,.10)' : 'transparent',
+          onPick: () => { this.map.flyTo({ center: c, zoom: 16.2, duration: 1500, essential: true }); this.openJunction(p, c); },
+        };
+      }).sort((a, b) => a.name.localeCompare(b.name));
+      out.push({ key: 'jnIndex', label: 'Junctions', dot: '#ec3013', count: items.length,
+                 rule: 'none', chev: f.jnIndex === false ? '▾' : '▸',
+                 open: f.jnIndex === false, onFold: foldToggle('jnIndex', true), items });
+    }
+
+    if (this.hasWards) {
+      const items = this.datasets.wards.fc.features.map((ft, i) => ({
+        name: this.wardName(ft.properties) || 'Ward',
+        meta: String(ft.properties.Ward_No ?? ft.properties.ward_no ?? ft.properties.WARD_NO ?? ''),
+        bg: 'transparent',
+        onPick: () => { const c = this.wardCentroid(ft); this.map.flyTo({ center: c, zoom: 14.6, duration: 1500, essential: true }); this.openWard({ ...ft, id: i }); },
+      })).sort((a, b) => (+a.meta || 0) - (+b.meta || 0) || a.name.localeCompare(b.name));
+      out.push({ key: 'wdIndex', label: 'Wards', dot: '#5B6B3C', count: items.length,
+                 rule: out.length ? '1px solid var(--color-divider)' : 'none',
+                 chev: f.wdIndex === false ? '▾' : '▸',
+                 open: f.wdIndex === false, onFold: foldToggle('wdIndex', true), items });
+    }
+    return out;
+  }
+
+  // The top rail. Each entry is a live map feature, not a settings row, so it
+  // shows its own state in its colour rather than needing a separate label.
+  featureBar() {
+    const s = this.state, L = s.layers;
+    const pill = (on, key, label, colour, dash) => ({
+      label, title: label, onToggle: () => this.toggleFeature(key),
+      bg: on ? colour : 'transparent', fg: on ? '#FBFAF8' : '#201e1d',
+      rule: '3px ' + (dash ? 'dashed ' : 'solid ') + (on ? '#FBFAF8' : colour),
+      dotOp: on ? '1' : '.75',
+    });
+    const out = [pill(L.water, 'water', 'Rivers', '#7595AC', false)];
+    if (this.hasVeg) out.push(pill(L.vegetation, 'vegetation', 'Greenery', '#7E9A63', false));
+    if (this.hasBuildings) out.push(pill(L.buildings, 'buildings', 'Buildings', '#9C8E7C', false));
+    out.push(pill(s.proposedOnly, 'proposed', 'Proposed', '#D8452A', true));
+    return out;
+  }
+  toggleFeature(key) {
+    if (key === 'proposed') return this.toggleProposed();
+    if (key === 'water') return this.toggleWater();
+    this.setState((st) => ({ layers: { ...st.layers, [key]: !st.layers[key] } }), () => {
+      if (key === 'vegetation') this.applyVegetation();
+      else if (key === 'buildings') this.applyBuildings();
+      else this.applyLayerVisibility();
+    });
   }
 
   toggleList() {
@@ -738,7 +842,7 @@ class Component extends DCLogic {
         sources: { carto: { type: 'raster', tileSize: 256, tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], attribution: '© OpenStreetMap contributors', maxzoom: 19 } },
         layers: [
           { id: 'bg', type: 'background', paint: { 'background-color': '#F7F6F3' } },
-          { id: 'basemap', type: 'raster', source: 'carto', paint: { 'raster-opacity': 0, 'raster-saturation': -1, 'raster-contrast': -0.42, 'raster-brightness-min': 0.86, 'raster-brightness-max': 1, 'raster-opacity-transition': { duration: 1600 } } },
+          { id: 'basemap', type: 'raster', source: 'carto', paint: { 'raster-opacity': 0, 'raster-saturation': -0.82, 'raster-contrast': -0.14, 'raster-brightness-min': 0.56, 'raster-brightness-max': 1, 'raster-opacity-transition': { duration: 1600 } } },
         ],
       },
       center: this.CENTER, zoom: 11.6, pitch: 48, bearing: -12, attributionControl: { compact: true }, fadeDuration: 500, preserveDrawingBuffer: true,
@@ -784,7 +888,7 @@ class Component extends DCLogic {
 
   async onMapLoad() {
     const map = this.map;
-    map.setPaintProperty('basemap', 'raster-opacity', this.props.basemapOpacity ?? 0.34);
+    map.setPaintProperty('basemap', 'raster-opacity', this.props.basemapOpacity ?? 0.55);
     const manifest = await this.loadJSON('data/manifest.json');
     this.datasets = {};
     for (const layer of manifest.layers) {
@@ -977,18 +1081,18 @@ class Component extends DCLogic {
     map.addSource('junctions', { type: 'geojson', data: junctions });
     map.addSource('stands', { type: 'geojson', data: stands });
     map.addSource('stops', { type: 'geojson', data: stops });
-    map.addLayer({ id: 'stops-dots', type: 'circle', source: 'stops', paint: { 'circle-radius': 3.5, 'circle-color': '#4A6B8A', 'circle-stroke-color': '#F7F6F3', 'circle-stroke-width': 1.2, 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
-    map.addLayer({ id: 'stand-dots', type: 'circle', source: 'stands', paint: { 'circle-radius': 7, 'circle-color': '#5B6B3C', 'circle-stroke-color': '#201e1d', 'circle-stroke-width': 2, 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
-    map.addLayer({ id: 'junction-dots', type: 'circle', source: 'junctions', paint: { 'circle-radius': 5, 'circle-color': '#ec3013', 'circle-stroke-color': '#F7F6F3', 'circle-stroke-width': 1.5, 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
+    map.addLayer({ id: 'stops-dots', type: 'circle', source: 'stops', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 2.2, 12, 3.0, 15, 3.8, 18, 4.4], 'circle-color': '#4A6B8A', 'circle-stroke-color': '#F7F6F3', 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 9, 1.0, 13, 1.4, 18, 1.8], 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
+    map.addLayer({ id: 'stand-dots', type: 'circle', source: 'stands', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 4.2, 12, 5.6, 15, 6.8, 18, 7.6], 'circle-color': '#5B6B3C', 'circle-stroke-color': '#201e1d', 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 9, 1.0, 13, 1.4, 18, 1.8], 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
+    map.addLayer({ id: 'junction-dots', type: 'circle', source: 'junctions', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 3.2, 12, 4.4, 15, 5.4, 18, 6.2], 'circle-color': '#ec3013', 'circle-stroke-color': '#F7F6F3', 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 9, 1.0, 13, 1.4, 18, 1.8], 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
 
     // markets (ch3, curated local, inside radius)
     map.addSource('markets', { type: 'geojson', data: { type: 'FeatureCollection', features: this.MARKETS.map((m) => ({ type: 'Feature', properties: { name: m.name, about: m.about || '' }, geometry: { type: 'Point', coordinates: m.c } })) } });
-    map.addLayer({ id: 'markets-dots', type: 'circle', source: 'markets', paint: { 'circle-radius': 5.5, 'circle-color': '#C29A2B', 'circle-stroke-color': '#201e1d', 'circle-stroke-width': 1.6, 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
+    map.addLayer({ id: 'markets-dots', type: 'circle', source: 'markets', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 3.2, 12, 4.4, 15, 5.4, 18, 6.2], 'circle-color': '#C29A2B', 'circle-stroke-color': '#201e1d', 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 9, 1.0, 13, 1.4, 18, 1.8], 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
 
     // road destinations (ch3) — dots + labels at each endpoint
     this.DESTS.forEach((d) => { const g = this.routeGeo[d.id]; d.c = g ? this.destOf(g) : this.SITE; });
     map.addSource('dests', { type: 'geojson', data: { type: 'FeatureCollection', features: this.DESTS.map((d) => ({ type: 'Feature', properties: { id: d.id, name: d.name, color: this.DEST_COLOR[d.cat] }, geometry: { type: 'Point', coordinates: d.c } })) } });
-    map.addLayer({ id: 'dests-dots', type: 'circle', source: 'dests', paint: { 'circle-radius': 6, 'circle-color': ['get', 'color'], 'circle-stroke-color': '#F7F6F3', 'circle-stroke-width': 1.8, 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
+    map.addLayer({ id: 'dests-dots', type: 'circle', source: 'dests', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 4.2, 12, 5.6, 15, 6.8, 18, 7.6], 'circle-color': ['get', 'color'], 'circle-stroke-color': '#F7F6F3', 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 9, 1.0, 13, 1.4, 18, 1.8], 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
     map.addLayer({ id: 'dests-labels', type: 'symbol', source: 'dests', layout: { 'visibility': 'none', 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Regular'], 'text-size': 11, 'text-anchor': 'left', 'text-offset': [0.8, 0], 'text-max-width': 9 }, paint: { 'text-color': '#201e1d', 'text-halo-color': '#F7F6F3', 'text-halo-width': 1.6 } });
 
     // bus corridors (ch4)
@@ -1017,6 +1121,7 @@ class Component extends DCLogic {
     // built environment — 3D massing, loaded after the map is up so it never
     // holds back the first paint
     this.addBuildings();
+    this.addVegetation();
 
     // tourist markers — drop pins
     this.touristMarkers = this.TOURIST.map((t) => {
@@ -1497,6 +1602,7 @@ class Component extends DCLogic {
     if (!map || !map.getLayer('junction-dots')) return;
     this.applyWater();
     this.applyBuildings();
+    this.applyVegetation();
     const pt = (layer, on) => { map.setPaintProperty(layer, 'circle-opacity', on ? 0.92 : 0); map.setPaintProperty(layer, 'circle-stroke-opacity', on ? 1 : 0); };
     if (sc === 'ch5') {
       if (map.getLayer('roads-line')) { map.moveLayer('roads-casing'); map.moveLayer('roads-line'); }
@@ -1612,6 +1718,57 @@ class Component extends DCLogic {
     if (era >= this.BLD_ERA_MAX || era < 0) return this.BLD_MASS;
     // the ring added by this period reads in the accent so growth is legible
     return ['case', ['==', ['get', 'era'], era], '#9d3521', this.BLD_MASS];
+  }
+
+  // ——— vegetation ————————————————————————————————————————————————
+  // Canopies are billboarded sprites rather than extrusions: they read as
+  // volume under pitch, cost almost nothing, and stay soft enough at low
+  // opacity that they never compete with the road drawing.
+  vegSprite(map, name, r) {
+    const px = Math.ceil(r * 2.6);
+    const c = document.createElement('canvas'); c.width = px; c.height = px;
+    const x = c.getContext('2d'), cx = px / 2, cy = px * 0.46;
+    x.fillStyle = 'rgba(60,74,48,.16)';                       // ground shadow
+    x.beginPath(); x.ellipse(cx + r * 0.18, px * 0.86, r * 0.82, r * 0.26, 0, 0, 6.3); x.fill();
+    x.strokeStyle = 'rgba(104,110,88,.5)'; x.lineWidth = Math.max(1, r * 0.13);
+    x.beginPath(); x.moveTo(cx, px * 0.84); x.lineTo(cx, cy); x.stroke();
+    const g = x.createRadialGradient(cx - r * 0.36, cy - r * 0.42, r * 0.12, cx, cy, r);
+    g.addColorStop(0, '#B9CBA0'); g.addColorStop(0.55, '#93AC7B'); g.addColorStop(1, '#6E875C');
+    x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r * 0.92, 0, 6.3); x.fill();
+    x.fillStyle = 'rgba(206,222,186,.5)';
+    x.beginPath(); x.arc(cx - r * 0.3, cy - r * 0.32, r * 0.36, 0, 6.3); x.fill();
+    map.addImage(name, { width: px, height: px, data: x.getImageData(0, 0, px, px).data });
+  }
+
+  addVegetation() {
+    const map = this.map;
+    this.loadJSON('data/vegetation.geojson').then((fc) => {
+      if (this._dead || !map.getStyle() || !fc || !fc.features) return;
+      // three sprite sizes stand in for a per-feature size multiplier, which
+      // cannot be expressed as runtime math beside a zoom ramp
+      this.vegSprite(map, 'veg-1', 13); this.vegSprite(map, 'veg-2', 17); this.vegSprite(map, 'veg-3', 22);
+      map.addSource('vegetation', { type: 'geojson', data: fc });
+      map.addLayer({
+        id: 'veg-trees', type: 'symbol', source: 'vegetation', minzoom: 13,
+        layout: {
+          'icon-image': ['step', ['get', 's'], 'veg-1', 0.95, 'veg-2', 1.16, 'veg-3'],
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 13, 0.16, 15, 0.34, 17, 0.72, 19, 1.4],
+          'icon-anchor': 'bottom',
+          'icon-allow-overlap': true, 'icon-ignore-placement': true,
+        },
+        paint: { 'icon-opacity': 0, 'icon-opacity-transition': { duration: 800 } },
+      }, map.getLayer('roads-casing') ? 'roads-casing' : undefined);
+      this.hasVeg = true;
+      this.setState((st) => ({ counts: { ...st.counts, veg: fc.features.length } }));
+      this.applyVegetation();
+    }).catch(() => {});
+  }
+
+  applyVegetation() {
+    const map = this.map, sc = this.state.scene;
+    if (!this.hasVeg || !map.getLayer('veg-trees')) return;
+    const on = this.state.layers.vegetation !== false && sc !== 'ch5';
+    map.setPaintProperty('veg-trees', 'icon-opacity', on ? 0.5 : 0);
   }
 
   addBuildings() {

@@ -67,9 +67,21 @@ What differs from the main atlas:
   stacking seams.
 - **`line-sort-key` by hierarchy**, so a lane can never paint across a highway —
   the main cause of the clipped-looking junctions.
-- **Paper palette**: the raster basemap is washed almost to white, water is
-  desaturated to slate, building massing is near-white card, and the two highway
-  grades carry the coral accent so the main axis reads at a glance.
+- **Palette**: the raster basemap is kept as a soft desaturated wash rather than
+  a photograph, water is muted to slate, building massing is near-white card, and
+  the two highway grades carry the coral accent so the main axis reads at a glance.
+- **Vegetation**: `data/vegetation.geojson` scatters 6,086 canopies across the
+  open land — derived by `tools/build_vegetation.py` as the negative space inside
+  the boundary, clear of every building, road and watercourse. Drawn as
+  billboarded sprites at low opacity, so they read as volume under pitch without
+  competing with the road drawing. Toggleable from the feature bar.
+- **Node sizes** ramp gently with zoom and clamp at both ends, so a junction is
+  always a comfortable click target and never a boulder over a zoomed-out taluk.
+- **Feature bar**: rivers, greenery, buildings and proposed roads collapse into a
+  single pill rail across the top instead of a stack of boxes in the corner.
+- **Left rail**: the chapter card folds, and junction and ward indexes sit below
+  it as headings that stay collapsed until opened. Picking an entry flies the map
+  to it and opens its detail panel.
 
 Note for anyone editing the widths: `line-width` will not accept runtime `+`/`*`
 next to a zoom `interpolate`, so all arithmetic is done in JS and the style only
