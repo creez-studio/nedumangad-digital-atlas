@@ -520,7 +520,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;cameraDrift&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Opening&quot;}, &quot;basemapOpacity&quot;: {&quot;editor&quot;: &quot;range&quot;, &quot;default&quot;: 0.5, &quot;min&quot;: 0, &quot;max&quot;: 1, &quot;step&quot;: 0.05, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Cartography&quot;}}">
 class Component extends DCLogic {
-  state = { scene: 'landing', mapStatus: 'Loading cartography…', stage: 0, showFacts: false, detail: null, counts: {}, period: 0, route: null, tourist: null, dest: null, folded: {}, mapReady: false, proposedOnly: false, hideUI: false, videoMode: false, videoT: 0, intro: false, introLabel: '', introSub: '', layers: { junctions: true, stand: true, stops: true, rings: false, landmarks: true, routes: true, wards: true, tourist: true, tvmRadius: true, markets: true, dests: true, contours: true, contourRoads: false, wardsTopo: true, cb0: true, cb1: true, cb2: true, cb3: true, water: true } };
+  state = { scene: 'landing', mapStatus: 'Loading cartography…', stage: 0, showFacts: false, detail: null, counts: {}, period: 0, route: null, tourist: null, dest: null, folded: {}, mapReady: false, proposedOnly: false, hideUI: false, videoMode: false, videoT: 0, intro: false, introLabel: '', introSub: '', layers: { junctions: true, stand: true, stops: true, rings: false, landmarks: true, routes: true, wards: true, tourist: true, tvmRadius: true, markets: true, dests: true, contours: true, contourRoads: false, wardsTopo: true, cb0: true, cb1: true, cb2: true, cb3: true, water: true, buildings: true } };
   RIVER_INFO = { 'Killi River': {
     also: 'Killiyar · കിള്ളിയാർ', part: 'Karamana River basin',
     rises: 'Theerthankara, near Panavur — Nedumangad taluk',
@@ -568,7 +568,7 @@ class Component extends DCLogic {
   DEST_COLOR = { hub: '#4A6B8A', market: '#C29A2B', landmark: '#201e1d', trade: '#8E1F12' };
   CHAPTERS = {
     ch1: { kicker: 'Chapter 01', title: 'Network & Junctions', desc: 'The living road network — hierarchy, named junctions, bus stand and stops. Click any feature for details.' },
-    ch2: { kicker: 'Chapter 02', title: 'Historical Evolution', desc: 'From forest trails and the Koyikkal court to the four-lane future — step the timeline; each step plays a short motion study.' },
+    ch2: { kicker: 'Chapter 02', title: 'Historical Evolution', desc: 'From forest trails and the Koyikkal court to the four-lane future — step the timeline and watch the built fabric grow outward from the palace and the chantha.' },
     ch3: { kicker: 'Chapter 03', title: 'Access & Modern Transport', desc: 'Reach by road to the airport, city markets and landmarks; a blue radius to Thiruvananthapuram, walking-time rings and markets in reach.' },
     ch4: { kicker: 'Chapter 04', title: 'Wards, Routes & Region', desc: 'Bus corridors in and out, the wards and roads they touch, and tourist places within reach — with images.' },
     ch5: { kicker: 'Chapter 05', title: 'Topography', desc: 'The 20 m contour surface. Everything else is off by default — toggle layers on as needed.' },
@@ -700,7 +700,9 @@ class Component extends DCLogic {
       if (this.hasWards) out.splice(1, 0, mk('wards', 'Ward boundaries', '#201e1d', '0', s.counts.wards));
       return out;
     }
-    return [mk('junctions', 'Junctions', '#ec3013', '50%', s.counts.junctions), mk('stand', 'Bus stand', '#5B6B3C', '0', s.counts.stand), mk('stops', 'Bus stops', '#4A6B8A', '50%', s.counts.stops)];
+    const out = [mk('junctions', 'Junctions', '#ec3013', '50%', s.counts.junctions), mk('stand', 'Bus stand', '#5B6B3C', '0', s.counts.stand), mk('stops', 'Bus stops', '#4A6B8A', '50%', s.counts.stops)];
+    if (this.hasBuildings) out.push(mk('buildings', 'Buildings (3D)', '#ab9a82', '0', s.counts.buildings));
+    return out;
   }
 
   detailRowsFromProps(p, extra) {
@@ -949,6 +951,10 @@ class Component extends DCLogic {
       map.addLayer({ id: 'wards-fill', type: 'fill', source: 'wards', paint: { 'fill-color': '#201e1d', 'fill-opacity': ['case', ['boolean', ['feature-state', 'sel'], false], 0.14, 0], 'fill-opacity-transition': { duration: 300 } } }, 'roads-glow');
       map.addLayer({ id: 'wards-line', type: 'line', source: 'wards', paint: { 'line-color': '#201e1d', 'line-width': 1, 'line-dasharray': [3, 2], 'line-opacity': 0, 'line-opacity-transition': { duration: 900 } } }, 'roads-glow');
     }
+
+    // built environment — 3D massing, loaded after the map is up so it never
+    // holds back the first paint
+    this.addBuildings();
 
     // tourist markers — drop pins
     this.touristMarkers = this.TOURIST.map((t) => {
@@ -1334,7 +1340,8 @@ class Component extends DCLogic {
     requestAnimationFrame(() => this.updateMapTools());
     if (sc !== 'ch5') map.setLayoutProperty('road-labels', 'visibility', 'visible');
     if (sc === 'ch1' || sc === 'ch3' || sc === 'ch4') map.setPaintProperty('roads-line', 'line-opacity', 0.9);
-    if (sc === 'ch1') { this.applyLayerVisibility(); map.fitBounds(this.BOUNDS, { padding: { top: 110, bottom: 100, left: 380, right: 80 }, pitch: 40, bearing: -10, duration: 3800, essential: true }); }
+    if (sc !== 'ch2') this.growBuildings(this.BLD_ERA_MAX);   // only the timeline winds the town back
+    if (sc === 'ch1') { this.applyLayerVisibility(); this.flyToBounds(this.BOUNDS, { padding: { top: 110, bottom: 100, left: 380, right: 80 }, pitch: 40, bearing: -10, duration: 3800, essential: true }); }
     else if (sc === 'ch2') { this.setState({ period: 0 }); this.applyPeriod(0); map.flyTo({ center: [77.008, 8.606], zoom: 13.0, pitch: 35, bearing: -8, duration: 3800, curve: 1.2, essential: true }); }
     else if (sc === 'ch3') { this.applyLayerVisibility(); map.fitBounds([[76.90, 8.44], [77.10, 8.66]], { padding: { top: 100, bottom: 120, left: 380, right: 70 }, pitch: 20, bearing: 0, duration: 3800, essential: true }); }
     else if (sc === 'ch4') { this.setState({ route: null }); this.applyLayerVisibility(); map.fitBounds([[76.86, 8.51], [77.16, 8.72]], { padding: { top: 100, bottom: 110, left: 360, right: 60 }, pitch: 25, bearing: 0, duration: 3800, essential: true }); }
@@ -1427,6 +1434,7 @@ class Component extends DCLogic {
     const map = this.map, L = this.state.layers, sc = this.state.scene;
     if (!map || !map.getLayer('junction-dots')) return;
     this.applyWater();
+    this.applyBuildings();
     const pt = (layer, on) => { map.setPaintProperty(layer, 'circle-opacity', on ? 0.92 : 0); map.setPaintProperty(layer, 'circle-stroke-opacity', on ? 1 : 0); };
     if (sc === 'ch5') {
       if (map.getLayer('roads-line')) { map.moveLayer('roads-line'); }
@@ -1485,13 +1493,18 @@ class Component extends DCLogic {
   applyPeriod(i) {
     const map = this.map, act = this.PERIODS[i].act;
     this.hideImgPopup();
-    this.setState({ detail: { kicker: this.PERIODS[i].years, accent: '#8E1F12', title: this.PERIODS[i].title, rows: [{ label: 'Interpretive note', value: this.PERIODS[i].note }] } });
+    const rows = [{ label: 'Interpretive note', value: this.PERIODS[i].note }];
+    const bld = this.BLD_NOTE[act];
+    if (bld && this.hasBuildings) rows.push({ label: 'Built fabric', value: bld });
+    this.setState({ detail: { kicker: this.PERIODS[i].years, accent: '#8E1F12', title: this.PERIODS[i].title, rows } });
     map.setFilter('roads-line', null); map.setPaintProperty('flows-line', 'line-opacity', 0); this.stopDash(); this.showMarkers([]);
     const early = act === 'trails' || act === 'palace' || act === 'flows' || act === 'market';
     if (map.getLayer('forest-fill')) { map.setPaintProperty('forest-base', 'fill-opacity', early ? 0.5 : 0); map.setPaintProperty('forest-fill', 'fill-opacity', early ? 0.85 : 0); }
     map.setPaintProperty('flows-line', 'line-width', early ? 3.4 : 3);
     this.stopRoadBlink();
     if (map.getLayer('chantha-fill')) { map.setPaintProperty('chantha-fill', 'fill-opacity', 0); map.setPaintProperty('chantha-line', 'line-opacity', 0); }
+    // the built environment grows outward from the palace/chantha nucleus
+    this.growBuildings({ trails: -1, palace: 0, flows: 1, market: 2, sh: 3, all: 4, modern: 4 }[act] ?? 4);
     const dimRoads = (op) => map.setPaintProperty('roads-line', 'line-opacity', op);
     if (act === 'trails') { dimRoads(0); this.startRoadBlink(); map.setPaintProperty('flows-line', 'line-opacity', 0.4); map.flyTo({ center: [77.005, 8.612], zoom: 12.2, pitch: 45, bearing: -15, duration: 2800, curve: 1.15, essential: true }); }
     else if (act === 'palace') { dimRoads(0.15); this.showMarkers(['palace']); map.flyTo({ center: [77.002896, 8.609251], zoom: 15.4, pitch: 45, bearing: 10, duration: 3000, curve: 1.15, essential: true }); }
@@ -1501,6 +1514,90 @@ class Component extends DCLogic {
     else if (act === 'all') { dimRoads(0.9); this.showMarkers(['market']); if (map.getLayer('chantha-fill')) { map.setPaintProperty('chantha-line', 'line-opacity', 0.5); } map.flyTo({ center: [77.002, 8.608], zoom: 12.6, pitch: 40, bearing: -12, duration: 2800, curve: 1.15, essential: true }); }
     else if (act === 'modern') { dimRoads(0.9); map.setPaintProperty('junction-dots', 'circle-opacity', 0.92); map.setPaintProperty('junction-dots', 'circle-stroke-opacity', 1); map.flyTo({ center: [76.995, 8.602], zoom: 12.3, pitch: 45, bearing: 15, duration: 3000, curve: 1.15, essential: true }); }
   }
+  // fitBounds derives its camera from cameraForBounds, which drops any pitch
+  // it is handed — so frame the bounds first, then fly there keeping the tilt.
+  flyToBounds(bounds, opts) {
+    const map = this.map;
+    const { padding, pitch = 0, bearing = 0, ...rest } = opts || {};
+    const cam = map.cameraForBounds(bounds, { padding, bearing });
+    if (!cam) { map.fitBounds(bounds, opts); return; }
+    map.flyTo({ center: cam.center, zoom: cam.zoom, bearing, pitch, curve: 1.2, ...rest });
+  }
+
+  // ——— built environment (3D massing) ————————————————————————————————
+  // Footprints carry `h` (metres, inferred from footprint area) and `era`
+  // (0 = the Koyikkal / chantha nucleus, 4 = the modern spread).
+  BLD_MASS = ['interpolate', ['linear'], ['get', 'h'], 3, '#ded6c9', 6, '#c8bbaa', 10, '#ab9a82', 16, '#8a7259'];
+  BLD_ERA_MAX = 4;
+  BLD_NOTE = {
+    trails: 'No fixed settlement — shifting forest clearings, nothing that leaves a footprint.',
+    palace: 'A first hamlet tightens around the palace: the court, its dependents and the artisan houses that serve it.',
+    flows: 'Houses and godowns thicken along the approach from the hills, between the palace and the trading ground.',
+    market: 'The chantha edge builds up solid — shopfronts, storage and lodging pressed against the market and the roads feeding it.',
+    sh: 'Building leaves the core and follows the new highway outward as a ribbon along the spine.',
+    all: 'Taluk and municipal functions fill the blocks behind the spine; residential streets colonise the land between the radials.',
+    modern: 'The full present-day fabric — continuous along every corridor, thinning into the plots between them.',
+  };
+
+  bldHeight(era) {
+    if (era >= this.BLD_ERA_MAX) return ['get', 'h'];
+    if (era < 0) return 0;
+    // Buildings of a later era sit at zero height and grow when their era
+    // arrives — the transition on the paint property does the rising.
+    return ['case', ['<=', ['get', 'era'], era], ['get', 'h'], 0];
+  }
+  bldColor(era) {
+    if (era >= this.BLD_ERA_MAX || era < 0) return this.BLD_MASS;
+    // the ring added by this period reads in the accent so growth is legible
+    return ['case', ['==', ['get', 'era'], era], '#9d3521', this.BLD_MASS];
+  }
+
+  addBuildings() {
+    const map = this.map;
+    this.loadJSON('data/buildings.geojson').then((fc) => {
+      if (this._dead || !map.getStyle() || !fc || !fc.features) return;
+      map.addSource('buildings', { type: 'geojson', data: fc });
+      map.addLayer({
+        id: 'buildings-3d', type: 'fill-extrusion', source: 'buildings', minzoom: 11.5,
+        paint: {
+          'fill-extrusion-color': this.BLD_MASS,
+          'fill-extrusion-height': ['get', 'h'],
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 0,
+          'fill-extrusion-vertical-gradient': true,
+          'fill-extrusion-opacity-transition': { duration: 700 },
+          'fill-extrusion-height-transition': { duration: 1800 },
+          'fill-extrusion-color-transition': { duration: 900 },
+        },
+      }, map.getLayer('road-labels') ? 'road-labels' : undefined);
+      this.hasBuildings = true;
+      this._bldEra = this.BLD_ERA_MAX;
+      this.setState((st) => ({ counts: { ...st.counts, buildings: fc.features.length } }));
+      this.applyBuildings();
+    }).catch(() => {});
+  }
+
+  // Show the town as it stood at `era`; -1 clears it entirely.
+  growBuildings(era) {
+    const map = this.map;
+    if (!this.hasBuildings || !map.getLayer('buildings-3d')) return;
+    this._bldEra = era;
+    map.setPaintProperty('buildings-3d', 'fill-extrusion-height', this.bldHeight(era));
+    map.setPaintProperty('buildings-3d', 'fill-extrusion-color', this.bldColor(era));
+    this.applyBuildings();
+  }
+
+  applyBuildings() {
+    const map = this.map, sc = this.state.scene;
+    if (!this.hasBuildings || !map.getLayer('buildings-3d')) return;
+    const on = this.state.layers.buildings !== false && sc !== 'ch5';
+    const era = this._bldEra == null ? this.BLD_ERA_MAX : this._bldEra;
+    // history reads best with the mass slightly more solid than in the
+    // analytical chapters, where it is context behind the network
+    const op = !on || era < 0 ? 0 : (sc === 'ch2' ? 0.9 : 0.62);
+    map.setPaintProperty('buildings-3d', 'fill-extrusion-opacity', op);
+  }
+
   startDash(layer) {
     this.stopDash(); this._dashLayer = layer;
     const seq = [[0, 1.4, 1.8], [0.4, 1.4, 1.4], [0.8, 1.4, 1.0], [1.2, 1.4, 0.6], [1.6, 1.4, 0.2], [1.8, 1.4, 1.8], [1.4, 1.4, 1.8], [1.0, 1.4, 1.8], [0.6, 1.4, 1.8], [0.2, 1.4, 1.8]];
