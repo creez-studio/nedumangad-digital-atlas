@@ -1,0 +1,19 @@
+{
+  "_note": "Curated junction context compiled from OSM, Kerala SH route records and local sources (2026). Interpretive where field data is missing — verify in survey. No traffic signals are tagged inside the municipality in OSM.",
+  "245581703": { "leads": "Town Road → Nedumangad Public Market · SH2 through town (Thiruvananthapuram ↔ Palode / Tenkasi)", "importance": "Core of the town — gateway to the largest market in Thiruvananthapuram district", "control": "No signal recorded (OSM) — police-managed at peak", "bus": "Nedumangad bus stand ≈ 400 m" },
+  "1499032393": { "leads": "SW → Karakulam · Thiruvananthapuram · NE → town centre", "importance": "Milestone junction — eleven miles from the capital on the old Thiruvananthapuram road", "control": "No signal recorded (OSM)" },
+  "6300501770": { "leads": "LIC office road ↔ SH2 town spine", "importance": "Commercial frontage on the through-town corridor", "control": "No signal recorded (OSM)" },
+  "8571228256": { "leads": "Town centre ↔ school cluster", "importance": "School-zone node between Market Junction and Kallampara", "control": "No signal recorded (OSM)" },
+  "2889270397": { "leads": "Town core ↔ Pazhakutty", "importance": "SH2 node linking the market core with the Pazhakutty fork", "control": "No signal recorded (OSM)" },
+  "245581720": { "leads": "NE → Anad · Palode · Thenmala · Tenkasi · S → town centre", "importance": "Fuel-pump landmark where the Tenkasi road (SH2) meets the town approach", "control": "No signal recorded (OSM)", "bus": "Pazhakutty stops on SH2" },
+  "3931695632": { "leads": "Thiruvananthapuram ↔ Palode · Kulathupuzha · Tenkasi", "importance": "The municipality's major fork — SH2 continues north-east while town roads turn south", "control": "No signal recorded (OSM)", "bus": "Pazhakutty stops on SH2" },
+  "2889270402": { "leads": "W → Vattappara (Vattappara–Valikode road) · E → town", "importance": "Western branch off the town spine", "control": "No signal recorded (OSM)" },
+  "6275841795": { "leads": "Local collector roads, western approach", "importance": "Neighbourhood junction between Valikkode and Kallampara", "control": "No signal recorded (OSM)" },
+  "6351686760": { "leads": "SW settlement roads toward Karakulam", "importance": "South-western settlement junction", "control": "No signal recorded (OSM)" },
+  "4476502183": { "leads": "Local roads, south-west quarter", "importance": "Local junction serving the Sannagar neighbourhood", "control": "No signal recorded (OSM)" },
+  "7500251192": { "leads": "South-western edge settlements", "importance": "Settlement junction near the boundary", "control": "No signal recorded (OSM)" },
+  "7793508398": { "leads": "W → Karakulam · E → town", "importance": "Boundary-edge junction on the capital approach", "control": "No signal recorded (OSM)" },
+  "7082002968": { "leads": "E → Karippur · Valiamala (LPSC / IIST) · W → town", "importance": "Bridge crossing carrying the eastern road out of town", "control": "No signal recorded (OSM)" },
+  "1988649620": { "leads": "NE → Vithura · Ponmudi · SW → town", "importance": "Milestone junction on the hill route — sixteen miles from the capital", "control": "No signal recorded (OSM)" },
+  "7631677938": { "leads": "Hill route toward Vithura and Ponmudi", "importance": "North-eastern quarter on the Ghats approach", "control": "No signal recorded (OSM)" }
+}

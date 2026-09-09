@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/modernist-653fe291-bd5b-47e1-b7b4-9df77f68988d/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="./doc-page.js"></script>
+  <style>
+    doc-page:not(:defined){visibility:hidden}
+    *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; box-sizing:border-box }
+    .pg{ height:100%; display:flex; flex-direction:column; background:#F7F6F3; color:#201e1d; font-family:'Archivo',var(--font-body),sans-serif; padding:0.5in 0.55in; }
+    .plate-head{ display:grid; grid-template-columns:auto 1fr auto; column-gap:22px; align-items:end; border-bottom:2px solid #201e1d; padding-bottom:12px; }
+    .plate-no{ font-weight:700; font-size:52px; line-height:.8; letter-spacing:-.02em; color:#ec3013; }
+    .plate-kick{ font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#6b6862; margin-bottom:5px; }
+    .plate-title{ font-weight:600; font-size:27px; line-height:1; letter-spacing:-.01em; }
+    .plate-meta{ text-align:right; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#6b6862; line-height:1.5; }
+    .fig{ flex:1; margin:14px 0 12px; border:2px solid #201e1d; overflow:hidden; position:relative; background:#eceae5; }
+    .fig img{ width:100%; height:100%; object-fit:cover; object-position:center; display:block; }
+    .fig-tag{ position:absolute; left:0; bottom:0; background:#201e1d; color:#F7F6F3; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; padding:5px 10px; }
+    .fig-north{ position:absolute; right:12px; top:12px; width:34px; height:34px; border:1.5px solid #201e1d; background:rgba(247,246,243,.9); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; }
+    .fig-north span{ font-size:8px; letter-spacing:.05em; }
+    .legend{ border-top:2px solid #201e1d; padding-top:10px; display:grid; grid-template-columns:1.35fr 1fr; column-gap:26px; }
+    .keys{ display:flex; flex-wrap:wrap; gap:7px 20px; align-content:flex-start; }
+    .key{ display:flex; align-items:center; gap:8px; font-size:11px; }
+    .sw{ width:22px; height:0; border-top-width:3px; border-top-style:solid; flex:none; }
+    .sw.dot{ width:11px; height:11px; border-radius:50%; border-top:0; }
+    .sw.dash{ border-top-style:dashed; }
+    .sw.box{ width:16px; height:11px; border-top:0; }
+    .cap{ font-size:11px; line-height:1.5; color:#3a3733; text-wrap:pretty; }
+    .cap b{ color:#201e1d; font-weight:600; }
+    /* cover */
+    .cover{ height:100%; display:flex; flex-direction:column; justify-content:space-between; background:#F7F6F3; color:#201e1d; font-family:'Archivo',sans-serif; padding:0.7in 0.7in 0.6in; }
+    .cover-rule{ width:80px; height:4px; background:#ec3013; }
+    .cover h1{ font-weight:700; font-size:46px; line-height:1.03; letter-spacing:-.015em; margin:16px 0 0; max-width:9in; }
+    .cover-sub{ font-size:17px; color:#3a3733; margin-top:12px; }
+    .cover-grid{ display:grid; grid-template-columns:repeat(4,1fr); border-top:2px solid #201e1d; }
+    .cover-cell{ padding:14px 16px 14px 0; border-right:1px solid #cfccc6; }
+    .cover-cell:last-child{ border-right:0; }
+    .cover-cell .v{ font-weight:600; font-size:22px; letter-spacing:-.01em; }
+    .cover-cell .l{ font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:#6b6862; margin-top:4px; }
+    .cover-foot{ display:flex; justify-content:space-between; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#6b6862; border-top:2px solid #201e1d; padding-top:10px; }
+    .toc{ display:grid; grid-template-columns:auto 1fr; gap:2px 18px; margin-top:8px; }
+    .toc a,.toc div{ text-decoration:none; color:#201e1d; }
+    .toc-no{ font-weight:600; color:#ec3013; font-size:12px; }
+    .toc-t{ font-size:13px; border-bottom:1px solid #e2dfd9; padding:6px 0; }
+  </style>
+</helmet>
+<div>
+  <doc-page orientation="landscape">
+
+    <section class="page">
+      <div class="cover">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600">Interactive Digital Atlas — Presentation Sheets</div>
+            <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6862">Architecture Design Studio</div>
+          </div>
+          <div class="cover-rule" style="margin-top:26px"></div>
+          <h1>Evolution of the Road Network &amp; Transportation System</h1>
+          <div class="cover-sub">Nedumangad Municipality · Nedumangad Taluk · Thiruvananthapuram District · Kerala</div>
+        </div>
+        <div class="cover-grid">
+          <div class="cover-cell"><div class="v">≈ 60,161</div><div class="l">Population (Census 2011)</div></div>
+          <div class="cover-cell"><div class="v">8.60° N</div><div class="l">Latitude · 77.00° E</div></div>
+          <div class="cover-cell"><div class="v">≈ 18 km</div><div class="l">NE of Thiruvananthapuram</div></div>
+          <div class="cover-cell"><div class="v">Six plates</div><div class="l">Spatial reading of the town</div></div>
+        </div>
+        <div>
+          <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#6b6862;margin-bottom:6px">Contents</div>
+          <div class="toc">
+            <div class="toc-no">01</div><div class="toc-t">Municipal Framework &amp; Road Hierarchy</div>
+            <div class="toc-no">02</div><div class="toc-t">Transportation Network — Junctions &amp; Stops</div>
+            <div class="toc-no">03</div><div class="toc-t">Accessibility &amp; Regional Reach</div>
+            <div class="toc-no">04</div><div class="toc-t">Wards, Corridors &amp; Region</div>
+            <div class="toc-no">05</div><div class="toc-t">Topography &amp; Terrain</div>
+            <div class="toc-no">06</div><div class="toc-t">Historical Evolution — Interpretive</div>
+          </div>
+        </div>
+        <div class="cover-foot">
+          <div>Cartography — MapLibre GL · OpenStreetMap · CARTO</div>
+          <div>Nedumangad Interactive Digital Atlas</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="pg">
+        <div class="plate-head">
+          <div class="plate-no">01</div>
+          <div><div class="plate-kick">Municipal Framework</div><div class="plate-title">Boundary &amp; Road Hierarchy</div></div>
+          <div class="plate-meta">Nedumangad Municipality<br>Scale ~1 : 55,000 @ A3<br>North up</div>
+        </div>
+        <div class="fig"><img src="assets/sheets/plate1_overview.png" alt="Road hierarchy of Nedumangad"><div class="fig-north">N<span>▲</span></div><div class="fig-tag">Plate 01 — Road hierarchy</div></div>
+        <div class="legend">
+          <div class="keys">
+            <div class="key"><span class="sw" style="border-top-color:#8E1F12"></span>National Highway</div>
+            <div class="key"><span class="sw" style="border-top-color:#C05B1D"></span>State Highway</div>
+            <div class="key"><span class="sw" style="border-top-color:#C29A2B"></span>Major District Road</div>
+            <div class="key"><span class="sw" style="border-top-color:#4B4845"></span>Municipal Road</div>
+            <div class="key"><span class="sw" style="border-top-color:#C6C2BC"></span>Local Road</div>
+            <div class="key"><span class="sw" style="border-top-color:#201e1d;border-top-width:2px"></span>Municipal boundary</div>
+            <div class="key"><span class="sw dot" style="background:#201e1d;border:0"></span>Town core (origin)</div>
+          </div>
+          <div class="cap">The municipality reads as a single fabric threaded by a clear road hierarchy. A <b>state-highway spine</b> crosses the town core while <b>major district roads</b> radiate outward, and the fine grain of <b>municipal and local roads</b> fills the wards — the geometry every later plate builds on.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="pg">
+        <div class="plate-head">
+          <div class="plate-no">02</div>
+          <div><div class="plate-kick">Transportation Network</div><div class="plate-title">Junctions, Bus Stand &amp; Stops</div></div>
+          <div class="plate-meta">Nedumangad Municipality<br>Points over road base<br>North up</div>
+        </div>
+        <div class="fig"><img src="assets/sheets/plate2_transport.png" alt="Transportation network"><div class="fig-north">N<span>▲</span></div><div class="fig-tag">Plate 02 — Transport points</div></div>
+        <div class="legend">
+          <div class="keys">
+            <div class="key"><span class="sw dot" style="background:#ec3013"></span>Junction</div>
+            <div class="key"><span class="sw dot" style="background:#5B6B3C"></span>Bus stand / station</div>
+            <div class="key"><span class="sw dot" style="background:#4A6B8A"></span>Bus stop</div>
+            <div class="key"><span class="sw" style="border-top-color:#C05B1D"></span>Road hierarchy (context)</div>
+          </div>
+          <div class="cap">Public movement concentrates at the <b>town junctions</b> and the <b>bus stand</b>, with stops strung along the primary corridors. The clustering confirms the core as the town's single interchange — where every route in the network resolves.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="pg">
+        <div class="plate-head">
+          <div class="plate-no">03</div>
+          <div><div class="plate-kick">Accessibility</div><div class="plate-title">Regional Reach &amp; Service Radius</div></div>
+          <div class="plate-meta">Town core → region<br>Rings measured from core<br>North up</div>
+        </div>
+        <div class="fig"><img src="assets/sheets/plate3_access.png" alt="Accessibility and regional reach"><div class="fig-north">N<span>▲</span></div><div class="fig-tag">Plate 03 — Accessibility</div></div>
+        <div class="legend">
+          <div class="keys">
+            <div class="key"><span class="sw dash" style="border-top-color:#4A6B8A"></span>Airport reach (≈ 22 km)</div>
+            <div class="key"><span class="sw dash" style="border-top-color:#C05B1D"></span>Walking-time rings (5·10·15 min)</div>
+            <div class="key"><span class="sw dot" style="background:#4A6B8A"></span>Road destination</div>
+            <div class="key"><span class="sw dot" style="background:#C29A2B"></span>Market in reach</div>
+            <div class="key"><span class="sw dot" style="background:#ec3013"></span>Junction</div>
+          </div>
+          <div class="cap">Measured from the town core, Nedumangad sits <b>within ≈ 22 km of Trivandrum International Airport</b> and a short drive from the district's markets and institutions. Concentric walking-time rings show how compact the core is — most civic destinations fall inside the fifteen-minute band.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="pg">
+        <div class="plate-head">
+          <div class="plate-no">04</div>
+          <div><div class="plate-kick">Region</div><div class="plate-title">Wards, Corridors &amp; Tourist Places</div></div>
+          <div class="plate-meta">Municipality &amp; surroundings<br>Corridors from route data<br>North up</div>
+        </div>
+        <div class="fig"><img src="assets/sheets/plate4_wards.png" alt="Wards, corridors and region"><div class="fig-north">N<span>▲</span></div><div class="fig-tag">Plate 04 — Wards &amp; corridors</div></div>
+        <div class="legend">
+          <div class="keys">
+            <div class="key"><span class="sw" style="border-top-color:#8E1F12;border-top-width:4px"></span>Bus corridor (in &amp; out)</div>
+            <div class="key"><span class="sw box" style="background:rgba(32,30,29,.08);border:1.5px solid #201e1d"></span>Ward boundary</div>
+            <div class="key"><span class="sw dot" style="background:#5B6B3C"></span>Tourist place</div>
+            <div class="key"><span class="sw dot" style="background:#ec3013"></span>Junction</div>
+          </div>
+          <div class="cap">The town's <b>in-and-out corridors</b> — toward Ponmudi, Palode–Tenkasi and the airport — stitch the wards to the wider region, while nearby <b>tourist places</b> in the Ghats feed movement back through the core. Ward boundaries locate which neighbourhoods each corridor serves.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="pg">
+        <div class="plate-head">
+          <div class="plate-no">05</div>
+          <div><div class="plate-kick">Topography</div><div class="plate-title">Terrain &amp; 20 m Contours</div></div>
+          <div class="plate-meta">Municipality extent<br>Contour interval 20 m<br>North up</div>
+        </div>
+        <div class="fig"><img src="assets/sheets/plate5_topo.png" alt="Topography and contours"><div class="fig-north">N<span>▲</span></div><div class="fig-tag">Plate 05 — Topography</div></div>
+        <div class="legend">
+          <div class="keys">
+            <div class="key"><span class="sw box" style="background:#7c9b57;border:0"></span>40–100 m</div>
+            <div class="key"><span class="sw box" style="background:#c3ba7a;border:0"></span>100–160 m</div>
+            <div class="key"><span class="sw box" style="background:#c99a5f;border:0"></span>160–220 m</div>
+            <div class="key"><span class="sw box" style="background:#824f2e;border:0"></span>220–290 m</div>
+            <div class="key"><span class="sw" style="border-top-color:#201e1d;border-top-width:1.5px"></span>Contour line (20 m)</div>
+            <div class="key"><span class="sw" style="border-top-color:#C05B1D"></span>Roads (context)</div>
+          </div>
+          <div class="cap">The land <b>climbs from the valley floor toward the Ghats in the north-east</b>. Black 20 m contours over a graded elevation wash reveal the ridges and stream valleys that constrained where roads and settlement could go — the terrain logic beneath the network.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="pg">
+        <div class="plate-head">
+          <div class="plate-no">06</div>
+          <div><div class="plate-kick">Historical Evolution</div><div class="plate-title">From Trade Routes to Network</div></div>
+          <div class="plate-meta">Interpretive reconstruction<br>Town &amp; core corridors<br>North up</div>
+        </div>
+        <div class="fig"><img src="assets/sheets/plate6_history.png" alt="Historical evolution"><div class="fig-north">N<span>▲</span></div><div class="fig-tag">Plate 06 — Historical evolution</div></div>
+        <div class="legend">
+          <div class="keys">
+            <div class="key"><span class="sw dot" style="background:#8E1F12;border:0"></span>Koyikkal Palace (c. 1677)</div>
+            <div class="key"><span class="sw dot" style="background:#8E1F12;border:0"></span>Nedumangad Chantha (market)</div>
+            <div class="key"><span class="sw" style="border-top-color:#C05B1D"></span>Present network (context)</div>
+          </div>
+          <div class="cap"><b>Interpretive reconstruction based on available historical evidence.</b> A royal seat at Koyikkal and the hill-produce trade fixed the market as the town's centre of gravity; the roads that grew inward toward the chantha are the same axes the modern network still follows.</div>
+        </div>
+      </div>
+    </section>
+
+  </doc-page>
+</div>
+</x-dc>
+</body>
+</html>

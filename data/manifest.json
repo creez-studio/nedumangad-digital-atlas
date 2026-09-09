@@ -1,0 +1,10 @@
+{
+  "comment": "Drop new GeoJSON files in data/ and register them here. role: boundary | roads | points | polygons | lines. Unregistered roles are loaded and kept available to later chapters.",
+  "layers": [
+    { "id": "boundary", "role": "boundary", "files": ["municipality_boundary.geojson"] },
+    { "id": "roads", "role": "roads", "files": ["roads_002.geojson", "roads_residential.geojson", "roads_add01.geojson"] },
+    { "id": "junctions", "role": "points", "files": ["junctions.geojson"] },
+    { "id": "busstops", "role": "points", "files": ["busstand.geojson"] },
+    { "id": "wards", "role": "polygons", "files": ["wards.geojson"], "optional": true }
+  ]
+}

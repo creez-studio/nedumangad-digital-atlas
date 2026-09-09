@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/modernist-653fe291-bd5b-47e1-b7b4-9df77f68988d/styles.css">
+  <script src="_ds/modernist-653fe291-bd5b-47e1-b7b4-9df77f68988d/_ds_bundle.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <style>
+    html,body{margin:0;background:#F7F6F3;overflow:hidden}
+    a{color:var(--color-text)} a:hover{color:var(--color-accent)}
+    @keyframes atlasRise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes atlasFade{from{opacity:0}to{opacity:1}}
+    @keyframes atlasPulse{0%{box-shadow:0 0 0 0 rgba(142,31,18,.5)}70%{box-shadow:0 0 0 14px rgba(142,31,18,0)}100%{box-shadow:0 0 0 0 rgba(142,31,18,0)}}
+    @keyframes atlasPing{0%{width:12px;height:12px;opacity:.85}100%{width:56px;height:56px;opacity:0}}
+    @keyframes atlasPop{0%{opacity:0;transform:scale(.9) translateY(10px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+    @keyframes atlasBob{0%{transform:translateY(0) rotate(-1.3deg)}50%{transform:translateY(-9px) rotate(1.3deg)}100%{transform:translateY(0) rotate(-1.3deg)}}
+    @keyframes atlasDraw{from{stroke-dashoffset:340}to{stroke-dashoffset:0}}
+    @keyframes atlasFlow{to{stroke-dashoffset:-28}}
+    @keyframes atlasSway{0%{transform:translateY(6px) rotate(-1.5deg);opacity:.6}40%{opacity:1}50%{transform:translateY(0) rotate(1.5deg)}100%{transform:translateY(6px) rotate(-1.5deg);opacity:.85}}
+    @keyframes atlasBeat{0%,100%{transform:scale(.6);opacity:.35}50%{transform:scale(1);opacity:1}}
+    @keyframes atlasWiden{from{transform:scaleX(.2)}to{transform:scaleX(1)}}
+    @keyframes atlasDrop{0%{transform:translateY(-16px) scale(.7);opacity:0}60%{transform:translateY(2px) scale(1.05)}100%{transform:translateY(0) scale(1);opacity:1}}
+    @keyframes atlasMove{from{offset-distance:0%}to{offset-distance:100%}}
+    @keyframes atlasMoveR{from{offset-distance:100%}to{offset-distance:0%}}
+    @keyframes atlasPopIn{0%{opacity:0;transform:scale(.82) translateY(14px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+    @keyframes atlasRevolve{0%{transform:rotateY(-8deg)}50%{transform:rotateY(8deg)}100%{transform:rotateY(-8deg)}}
+    @keyframes atlasSpin{to{transform:rotate(360deg)}}
+    @keyframes atlasScan{0%{transform:translateX(-130%)}100%{transform:translateX(360%)}}
+    .atlas-imgpop{perspective:760px;pointer-events:none}
+    .atlas-imgpop-card{transform-style:preserve-3d;animation:atlasPopIn .42s cubic-bezier(.2,1.2,.4,1) both,atlasRevolve 5.5s ease-in-out .42s infinite;background:#F7F6F3;border:2px solid var(--color-divider);box-shadow:var(--shadow-lg);width:224px}
+    .atlas-imgpop-card .cap{padding:8px 11px 10px}
+    .atlas-imgpop-card .cap b{font-family:Archivo,sans-serif;font-weight:600;font-size:13px;letter-spacing:-.01em;display:block}
+    .atlas-imgpop-card .cap span{font-size:10.5px;color:var(--color-neutral-600);display:block;margin-top:2px;line-height:1.35}
+    .atlas-poi{background:#201e1d;color:#F7F6F3;font-family:Archivo,sans-serif;font-size:11px;letter-spacing:.06em;padding:4px 9px;white-space:nowrap;box-shadow:var(--shadow-sm)}
+    .atlas-poi.hist{background:#8E1F12}
+    .atlas-pin{cursor:pointer}
+    .atlas-pin-inner{display:flex;flex-direction:column;align-items:center;transform-origin:bottom center;animation:atlasDrop .5s cubic-bezier(.2,1.3,.4,1) both}
+    .atlas-pin .lbl{font-family:Archivo,sans-serif;font-size:11px;letter-spacing:.04em;font-weight:600;color:#F7F6F3;padding:3px 8px;white-space:nowrap;box-shadow:var(--shadow-sm);margin-bottom:3px}
+    .atlas-pin.hist .lbl{animation:atlasPulse 2.4s infinite}
+    .atlas-pulse{position:relative;width:14px;height:14px}
+    .atlas-pulse i{position:absolute;left:50%;top:50%;border:2px solid var(--pc,#8E1F12);border-radius:50%;transform:translate(-50%,-50%);animation:atlasPing 1.5s ease-out infinite}
+    .atlas-pulse i:nth-child(2){animation-delay:.6s}
+    .maplibregl-ctrl-attrib{background:rgba(247,246,243,.7)!important;font-family:var(--font-body)!important;font-size:10px!important}
+    .maplibregl-ctrl-group{border-radius:0!important;box-shadow:var(--shadow-sm)!important}
+  </style>
+</helmet>
+<x-import component-from-global-scope="image-slot" from="./image-slot.js" hint-size="1px,1px"></x-import>
+<div style="font-family:var(--font-body);color:var(--color-text);height:100vh;overflow:hidden">
+  <div id="atlas-map" style="position: fixed; inset: 0; background: #F7F6F3; left: 57px; top: 12px"></div>
+
+  <div style="position:fixed;top:0;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:18px 44px;pointer-events:none;background:linear-gradient(rgba(247,246,243,.9),rgba(247,246,243,0))">
+    <div style="display:flex;align-items:center;gap:22px">
+      <div style="font-family:var(--font-heading);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase">Nedumangad</div>
+      <sc-if value="{{ showBack }}" hint-placeholder-val="{{ false }}">
+        <button class="btn btn-secondary" onClick="{{ onBack }}" style="pointer-events:auto;padding:6px 14px;font-size:12px">← {{ backLabel }}</button>
+      </sc-if>
+      <sc-if value="{{ showDeselect }}" hint-placeholder-val="{{ false }}">
+        <button class="btn btn-ghost" onClick="{{ onDeselectAll }}" style="pointer-events:auto;padding:6px 12px;font-size:12px">✕ Deselect all</button>
+      </sc-if>
+    </div>
+    <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">{{ topRight }}</div>
+  </div>
+
+  <sc-if value="{{ showFold }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;top:70px;right:44px;z-index:7;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none">
+      <button onClick="{{ onWater }}" style="pointer-events:auto;display:flex;align-items:center;gap:9px;background:{{ waterBg }};color:{{ waterFg }};border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);padding:9px 13px;font-family:var(--font-body);font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">
+        <span style="width:17px;height:0;border-top:3px solid {{ waterDot }};display:inline-block"></span>{{ waterLabel }}
+      </button>
+      <button onClick="{{ onProposed }}" style="pointer-events:auto;display:flex;align-items:center;gap:9px;background:{{ proposedBg }};color:{{ proposedFg }};border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);padding:9px 13px;font-family:var(--font-body);font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">
+        <span style="width:17px;height:0;border-top:3px dashed {{ proposedDot }};display:inline-block"></span>{{ proposedLabel }}
+      </button>
+      <button onClick="{{ onHideUI }}" style="pointer-events:auto;display:flex;align-items:center;gap:9px;background:rgba(247,246,243,.95);color:var(--color-text);border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);padding:9px 13px;font-family:var(--font-body);font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer"><span style="font-size:13px;line-height:1">{{ foldGlyph }}</span>{{ foldLabel }}</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showMapTools }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:72px;bottom:26px;z-index:6;display:flex;align-items:flex-end;gap:14px;pointer-events:none">
+      <div style="background:rgba(247,246,243,.94);border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);width:52px;height:52px;display:flex;align-items:center;justify-content:center">
+        <div id="atlas-north-arrow" style="width:34px;height:34px;position:relative;transition:transform .18s linear">
+          <svg viewBox="0 0 34 34" style="display:block"><polygon points="17,3 22,19 17,14.5 12,19" fill="#8E1F12"></polygon><polygon points="17,31 12,19 17,23 22,19" fill="#201e1d"></polygon></svg>
+          <div style="position:absolute;top:-3px;left:50%;transform:translateX(-50%);font-family:var(--font-heading);font-weight:700;font-size:9px;color:#8E1F12">N</div>
+        </div>
+      </div>
+      <div style="background:rgba(247,246,243,.94);border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);padding:8px 13px 10px">
+        <div id="atlas-scale-label" style="font-family:var(--font-heading);font-weight:600;font-size:11px;letter-spacing:.03em;margin-bottom:5px;color:var(--color-text)">— m</div>
+        <div id="atlas-scale-bar" style="width:104px;height:7px;border:1.5px solid #201e1d;border-top:none;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:50%;background:#201e1d"></div></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Opening" style="position:fixed;inset:0;z-index:4;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:none">
+      <div style="position:absolute;inset:0;background:linear-gradient(105deg,rgba(247,246,243,.96) 0%,rgba(247,246,243,.88) 32%,rgba(247,246,243,.4) 54%,rgba(247,246,243,0) 72%);pointer-events:none"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(rgba(247,246,243,0),rgba(247,246,243,.85));pointer-events:none"></div>
+      <div style="position:relative;padding:0 44px 56px;max-width:760px">
+        <div style="width:64px;height:2px;background:var(--color-accent);margin-bottom:22px;animation:atlasRise .9s .5s both"></div>
+        <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:14px;animation:atlasRise .9s .65s both">Architecture Design Studio</div>
+        <h1 style="font-family:var(--font-heading);font-weight:600;font-size:clamp(38px,4.2vw,66px);line-height:1.04;margin:0 0 14px;letter-spacing:-.01em;animation:atlasRise .9s .8s both">Evolution of the Road Network &amp; Transportation System</h1>
+        <div style="font-size:clamp(18px,1.5vw,23px);color:var(--color-neutral-700);margin-bottom:32px;animation:atlasRise .9s 1s both">Nedumangad Municipality — Thiruvananthapuram, Kerala</div>
+        <sc-if value="{{ mapReady }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:20px;pointer-events:auto;animation:atlasRise .7s both">
+            <button class="btn btn-primary" onClick="{{ onBegin }}" style="min-width:180px;justify-content:flex-start;text-align:left">Begin →</button>
+            <button class="btn btn-secondary" onClick="{{ onSkip }}" style="justify-content:flex-start;text-align:left">Skip intro →</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ notReady }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:18px;pointer-events:none;animation:atlasFade .6s both">
+            <svg width="52" height="52" viewBox="0 0 52 52" style="display:block;flex-shrink:0">
+              <circle cx="26" cy="26" r="22" fill="none" stroke="var(--color-neutral-300)" stroke-width="2"></circle>
+              <circle cx="26" cy="26" r="22" fill="none" stroke="var(--color-accent)" stroke-width="2.4" stroke-dasharray="36 102" stroke-linecap="butt" style="transform-origin:26px 26px;animation:atlasSpin 1.05s linear infinite"></circle>
+              <line x1="26" y1="5" x2="26" y2="15" stroke="#201e1d" stroke-width="1.4"></line>
+              <line x1="26" y1="37" x2="26" y2="47" stroke="#201e1d" stroke-width="1.4"></line>
+              <line x1="5" y1="26" x2="15" y2="26" stroke="#201e1d" stroke-width="1.4"></line>
+              <line x1="37" y1="26" x2="47" y2="26" stroke="#201e1d" stroke-width="1.4"></line>
+              <circle cx="26" cy="26" r="3.2" fill="var(--color-accent)" style="transform-origin:26px 26px;animation:atlasBeat 1.4s ease-in-out infinite"></circle>
+            </svg>
+            <div>
+              <div style="font-family:var(--font-heading);font-weight:600;font-size:14px;letter-spacing:.01em;color:var(--color-text)">Surveying the boundary</div>
+              <div style="font-size:12px;color:var(--color-neutral-600);margin-top:2px">Loading cartography, roads &amp; terrain…</div>
+              <div style="width:230px;height:2px;background:var(--color-neutral-300);margin-top:10px;overflow:hidden"><div style="width:38%;height:100%;background:var(--color-accent);animation:atlasScan 1.25s ease-in-out infinite"></div></div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isIntro }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;top:92px;left:44px;z-index:6;pointer-events:none;max-width:560px">
+      <div key="{{ introLabel }}" style="animation:atlasRise .5s cubic-bezier(.2,.8,.3,1) both">
+        <div style="width:44px;height:2px;background:var(--color-accent);margin-bottom:13px"></div>
+        <div style="font-family:var(--font-heading);font-weight:600;font-size:clamp(30px,3.6vw,54px);line-height:1.02;letter-spacing:-.015em;color:var(--color-text);text-shadow:0 1px 20px rgba(247,246,243,.92)">{{ introLabel }}</div>
+        <div style="font-size:14.5px;letter-spacing:.02em;color:var(--color-neutral-700);margin-top:7px">{{ introSub }}</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isContext }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Geographical Context" style="position:fixed;inset:0;z-index:4;pointer-events:none">
+      <sc-if value="{{ introDone }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:44px;bottom:56px;max-width:420px">
+        <div style="width:48px;height:2px;background:var(--color-accent);margin-bottom:16px"></div>
+        <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:8px">Geographical context</div>
+        <div style="font-family:var(--font-heading);font-weight:600;font-size:40px;line-height:1.05;letter-spacing:-.01em;animation:atlasRise .7s both" key="{{ stageLabel }}">{{ stageLabel }}</div>
+        <div style="font-size:14px;line-height:1.55;color:var(--color-neutral-700);margin-top:10px;animation:atlasFade .9s .2s both" key="{{ stageNote }}">{{ stageNote }}</div>
+      </div></sc-if>
+      <sc-if value="{{ showFacts }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;right:44px;top:88px;bottom:56px;width:360px;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:auto">
+          <div style="background:rgba(247,246,243,.94);border:2px solid var(--color-divider);padding:24px 26px;box-shadow:var(--shadow-md)">
+            <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:14px">Nedumangad Municipality</div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ facts }}" as="f" hint-placeholder-count="8">
+                <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;padding:7px 0;border-bottom:1px solid var(--color-neutral-300);animation:atlasRise .5s {{ f.delay }} both">
+                  <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-600);padding-top:2px">{{ f.label }}</div>
+                  <div style="font-size:13.5px;font-weight:500">{{ f.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <button class="btn btn-primary btn-block" onClick="{{ onGo }}" style="margin-top:20px;justify-content:flex-start;text-align:left">Go to Nedumangad →</button>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isMain }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Chapters" style="position:fixed;inset:0;z-index:4;pointer-events:none;display:flex;flex-direction:column;justify-content:flex-end">
+      <div style="padding:0 44px 40px;max-width:640px;pointer-events:auto">
+        <div style="width:48px;height:2px;background:var(--color-accent);margin-bottom:14px;animation:atlasRise .6s both"></div>
+        <div style="font-family:var(--font-heading);font-weight:600;font-size:34px;letter-spacing:-.01em;margin-bottom:18px;animation:atlasRise .6s .1s both">Explore Nedumangad</div>
+        <div style="border-top:2px solid var(--color-divider);background:rgba(247,246,243,.92)">
+          <sc-for list="{{ menu }}" as="m" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:48px 1fr auto;gap:18px;align-items:center;padding:14px 18px 14px 0;border-bottom:1px solid var(--color-neutral-300);animation:atlasRise .5s {{ m.delay }} both">
+              <div style="font-family:var(--font-heading);font-weight:600;font-size:14px;color:var(--color-neutral-500);padding-left:2px">{{ m.num }}</div>
+              <div>
+                <div style="font-family:var(--font-heading);font-weight:600;font-size:17px">{{ m.title }}</div>
+                <div style="font-size:12.5px;color:var(--color-neutral-600);margin-top:2px">{{ m.desc }}</div>
+              </div>
+              <button class="btn btn-primary" onClick="{{ m.onEnter }}" style="justify-content:flex-start;text-align:left">Enter →</button>
+            </div>
+          </sc-for>
+        </div>
+        <button class="btn btn-ghost" onClick="{{ onReplay }}" style="margin-top:10px;padding-left:0">↻ Replay introduction</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isCh2Scene }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.52;mix-blend-mode:multiply;background:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='170' height='170' filter='url(%23n)'/%3E%3C/svg%3E&quot;),radial-gradient(135% 130% at 50% 12%,rgba(0,0,0,0) 40%,rgba(74,48,18,.6) 100%)"></div>
+    <div style="position:fixed;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(120,86,40,.16) 0%,rgba(120,86,40,0) 18%,rgba(120,86,40,0) 82%,rgba(90,60,24,.22) 100%)"></div>
+  </sc-if>
+
+  <sc-if value="{{ inChapter }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:44px;top:84px;bottom:120px;z-index:4;width:300px;pointer-events:none;display:flex;flex-direction:column;gap:12px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none">
+      <div style="background:rgba(247,246,243,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--color-divider);padding:18px 20px;box-shadow:var(--shadow-sm);pointer-events:auto;flex-shrink:0;animation:atlasRise .6s both">
+        <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent);margin-bottom:4px">{{ chKicker }}</div>
+        <div style="font-family:var(--font-heading);font-weight:600;font-size:21px;letter-spacing:-.01em">{{ chTitle }}</div>
+        <div style="font-size:12.5px;line-height:1.5;color:var(--color-neutral-700);margin-top:6px">{{ chDesc }}</div>
+      </div>
+
+      <sc-if value="{{ isCh2 }}" hint-placeholder-val="{{ false }}">
+        <div style="background:rgba(247,246,243,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);pointer-events:auto;flex-shrink:0;display:flex;flex-direction:column;animation:atlasRise .6s .1s both">
+          <button onClick="{{ fold.timeline }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;border:none;background:none;cursor:pointer;padding:14px 20px 10px;font-family:var(--font-body)">
+            <span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">Timeline · 1600 – 2026</span>
+            <span style="font-size:11px;color:var(--color-neutral-500)">{{ chev.timeline }}</span>
+          </button>
+          <sc-if value="{{ open.timeline }}" hint-placeholder-val="{{ true }}">
+            <div style="max-height:42vh;overflow-y:auto">
+              <sc-for list="{{ periods }}" as="p" hint-placeholder-count="8">
+                <button onClick="{{ p.onPick }}" style="display:block;width:100%;text-align:left;border:none;cursor:pointer;padding:10px 20px;border-left:3px solid {{ p.bar }};background:{{ p.bg }};color:{{ p.fg }};font-family:var(--font-body)">
+                  <div style="font-family:var(--font-heading);font-weight:600;font-size:13px;letter-spacing:.04em">{{ p.years }}</div>
+                  <div style="font-size:12px;margin-top:1px;opacity:.85">{{ p.title }}</div>
+                </button>
+              </sc-for>
+              <div style="font-size:10.5px;line-height:1.45;color:var(--color-neutral-600);padding:10px 20px 14px;border-top:1px solid var(--color-neutral-300)">Interpretive reconstruction based on available historical evidence. Trade paths follow present-day road geometry.</div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCh4 }}" hint-placeholder-val="{{ false }}">
+        <div style="background:rgba(247,246,243,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);pointer-events:auto;flex-shrink:0;display:flex;flex-direction:column;animation:atlasRise .6s .1s both">
+          <button onClick="{{ fold.corridors }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;border:none;background:none;cursor:pointer;padding:14px 20px 10px;font-family:var(--font-body)">
+            <span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">In &amp; out — bus corridors</span>
+            <span style="font-size:11px;color:var(--color-neutral-500)">{{ chev.corridors }}</span>
+          </button>
+          <sc-if value="{{ open.corridors }}" hint-placeholder-val="{{ true }}">
+            <div style="max-height:30vh;overflow-y:auto">
+              <sc-for list="{{ routes }}" as="r" hint-placeholder-count="4">
+                <button onClick="{{ r.onPick }}" style="display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;border:none;cursor:pointer;padding:9px 20px;border-left:3px solid {{ r.bar }};background:{{ r.bg }};color:{{ r.fg }};font-family:var(--font-body)">
+                  <span style="width:18px;height:0;border-top:3px solid {{ r.color }};margin-top:8px;flex-shrink:0"></span>
+                  <span>
+                    <span style="display:block;font-family:var(--font-heading);font-weight:600;font-size:12.5px;line-height:1.25">{{ r.name }}</span>
+                    <span style="display:block;font-size:11px;margin-top:1px;opacity:.8">{{ r.dir }}</span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <div style="background:rgba(247,246,243,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);pointer-events:auto;flex-shrink:0;display:flex;flex-direction:column;animation:atlasRise .6s .15s both">
+          <button onClick="{{ fold.tourist }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;border:none;background:none;cursor:pointer;padding:14px 20px 10px;font-family:var(--font-body)">
+            <span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">Tourist places nearby</span>
+            <span style="font-size:11px;color:var(--color-neutral-500)">{{ chev.tourist }}</span>
+          </button>
+          <sc-if value="{{ open.tourist }}" hint-placeholder-val="{{ true }}">
+            <div style="max-height:26vh;overflow-y:auto">
+              <sc-for list="{{ tourist }}" as="tp" hint-placeholder-count="7">
+                <button onClick="{{ tp.onPick }}" style="display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;border:none;background:{{ tp.bg }};cursor:pointer;padding:7px 20px;font-family:var(--font-body);color:var(--color-text)">
+                  <span style="width:8px;height:8px;background:#5B6B3C;flex-shrink:0"></span>
+                  <span style="font-size:12.5px;font-weight:500">{{ tp.name }}</span>
+                  <span style="font-size:11px;color:var(--color-neutral-500);margin-left:auto;flex-shrink:0">{{ tp.d }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCh3 }}" hint-placeholder-val="{{ false }}">
+        <div style="background:rgba(247,246,243,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);pointer-events:auto;flex-shrink:0;display:flex;flex-direction:column;animation:atlasRise .6s .1s both">
+          <button onClick="{{ fold.dests }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;border:none;background:none;cursor:pointer;padding:14px 20px 10px;font-family:var(--font-body)">
+            <span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">By road — travel time</span>
+            <span style="font-size:11px;color:var(--color-neutral-500)">{{ chev.dests }}</span>
+          </button>
+          <sc-if value="{{ open.dests }}" hint-placeholder-val="{{ true }}">
+            <div style="max-height:38vh;overflow-y:auto">
+              <sc-for list="{{ dests }}" as="d" hint-placeholder-count="7">
+                <button onClick="{{ d.onPick }}" style="display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:none;cursor:pointer;padding:9px 20px;border-left:3px solid {{ d.bar }};background:{{ d.bg }};font-family:var(--font-body);color:var(--color-text)">
+                  <span style="width:9px;height:9px;background:{{ d.color }};flex-shrink:0"></span>
+                  <span style="line-height:1.2">
+                    <span style="display:block;font-size:12.5px;font-weight:500">{{ d.name }}</span>
+                    <span style="display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-500);margin-top:1px">{{ d.cat }}</span>
+                  </span>
+                  <span style="font-family:var(--font-heading);font-weight:600;font-size:12px;color:{{ d.color }};margin-left:auto;flex-shrink:0;text-align:right">{{ d.trip }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="font-size:10.5px;line-height:1.45;color:var(--color-neutral-600);padding:9px 20px 13px;border-top:1px solid var(--color-neutral-300)">Driving distance &amp; time (OpenRouteService). Select to trace the route. Origin: town core — updates to the proposed site once marked.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showToggles }}" hint-placeholder-val="{{ false }}">
+        <div style="background:rgba(247,246,243,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);pointer-events:auto;flex-shrink:0;animation:atlasRise .6s .1s both">
+          <button onClick="{{ fold.layers }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;border:none;background:none;cursor:pointer;padding:16px 20px 10px;font-family:var(--font-body)">
+            <span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">Layers</span>
+            <span style="font-size:11px;color:var(--color-neutral-500)">{{ chev.layers }}</span>
+          </button>
+          <sc-if value="{{ open.layers }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:7px;padding:0 20px 16px">
+              <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="4">
+                <button onClick="{{ t.onToggle }}" style="display:flex;align-items:center;gap:11px;border:none;background:none;cursor:pointer;padding:2px 0;font-family:var(--font-body);color:var(--color-text)">
+                  <span style="width:14px;height:14px;border:2px solid #201e1d;background:{{ t.boxBg }};display:inline-block;flex-shrink:0"></span>
+                  <span style="width:14px;height:14px;background:{{ t.swatch }};border-radius:{{ t.round }};display:inline-block;flex-shrink:0"></span>
+                  <span style="font-size:13px">{{ t.label }}</span>
+                  <span style="font-size:11px;color:var(--color-neutral-500);margin-left:auto">{{ t.count }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showWardNotice }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#201e1d;color:#F7F6F3;padding:14px 18px;box-shadow:var(--shadow-sm);pointer-events:auto;flex-shrink:0;animation:atlasRise .6s .15s both">
+          <div style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#e0a99f;margin-bottom:6px">Ward boundaries — not loaded</div>
+          <div style="font-size:12px;line-height:1.5;opacity:.9">Drop <span style="font-family:ui-monospace,monospace">wards.geojson</span> into <span style="font-family:ui-monospace,monospace">data/</span>.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showHierarchy }}" hint-placeholder-val="{{ false }}">
+        <div style="background:rgba(247,246,243,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);pointer-events:auto;flex-shrink:0;animation:atlasRise .6s .2s both">
+          <button onClick="{{ fold.roads }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;border:none;background:none;cursor:pointer;padding:16px 20px 10px;font-family:var(--font-body)">
+            <span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">Road hierarchy</span>
+            <span style="font-size:11px;color:var(--color-neutral-500)">{{ chev.roads }}</span>
+          </button>
+          <sc-if value="{{ open.roads }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:7px;padding:0 20px 14px">
+              <sc-for list="{{ legend }}" as="l" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:11px">
+                  <div style="width:24px;height:0;border-top:3px solid {{ l.color }}"></div>
+                  <div style="font-size:12.5px">{{ l.label }}</div>
+                  <div style="font-size:11px;color:var(--color-neutral-500);margin-left:auto">{{ l.count }}</div>
+                </div>
+              </sc-for>
+              <div style="font-size:11px;color:var(--color-neutral-600);margin-top:6px;line-height:1.45">{{ hint }}</div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isCh2 }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:44px;top:162px;z-index:4;width:300px;pointer-events:none">
+      <div style="background:rgba(244,236,221,.9);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);border:2px solid #b0996f;box-shadow:0 14px 34px rgba(74,48,18,.28);pointer-events:auto;animation:atlasRise .6s both;position:relative">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--color-accent)"></div>
+        <div style="padding:16px 18px 0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">{{ pYears }}</div>
+        <div style="padding:2px 18px 0;font-family:var(--font-heading);font-weight:600;font-size:20px;letter-spacing:-.01em">{{ pTitle }}</div>
+        <sc-if value="{{ pHasImg }}" hint-placeholder-val="{{ false }}">
+          <div key="{{ motionKey }}" style="margin:12px 0 0">
+            <div class="grayscale" style="width:100%;background:#201e1d;position:relative">{{ pImgEl }}</div>
+            <div style="padding:6px 18px 0;font-size:10.5px;color:var(--color-neutral-600);line-height:1.4">{{ pImgCap }}</div>
+          </div>
+        </sc-if>
+        <div key="{{ motionKey }}" style="margin:12px 0 0;background:#201e1d">
+          <sc-if value="{{ mTrails }}" hint-placeholder-val="{{ false }}">
+            <svg viewBox="0 0 300 130" style="display:block;width:100%">
+              <path d="M24 104 C 80 104 78 40 140 58 S 250 34 278 74" fill="none" stroke="#3a3734" stroke-width="8" stroke-linecap="round"></path>
+              <path d="M24 104 C 80 104 78 40 140 58 S 250 34 278 74" fill="none" stroke="#C05B1D" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 7" style="animation:atlasFlow 1.1s linear infinite"></path>
+              <g>
+                <rect x="249.2" y="49" width="1.8" height="7" fill="#5a3d22"></rect><circle cx="250" cy="46" r="7" fill="#3f5524"></circle><circle cx="247.8" cy="44" r="4.2" fill="#7a9646"></circle>
+                <rect x="267.2" y="40" width="1.6" height="6" fill="#5a3d22"></rect><circle cx="268" cy="37" r="5.2" fill="#3f5524"></circle><circle cx="266.3" cy="35.4" r="3.1" fill="#7a9646"></circle>
+                <rect x="233.2" y="60" width="1.6" height="6" fill="#5a3d22"></rect><circle cx="234" cy="57" r="5.2" fill="#3f5524"></circle><circle cx="232.3" cy="55.4" r="3.1" fill="#7a9646"></circle>
+              </g>
+              <g style="offset-path:path('M24 104 C 80 104 78 40 140 58 S 250 34 278 74');animation:atlasMove 4.6s linear infinite">
+                <circle cx="0" cy="-7" r="2.6" fill="#F7F6F3"></circle><rect x="-1.3" y="-4.5" width="2.6" height="8" rx="1" fill="#F7F6F3"></rect>
+              </g>
+              <circle cx="24" cy="104" r="5" fill="#F7F6F3"></circle><circle cx="278" cy="74" r="6" fill="#C05B1D"></circle>
+            </svg>
+          </sc-if>
+          <sc-if value="{{ mPalace }}" hint-placeholder-val="{{ false }}">
+            <svg viewBox="0 0 300 130" style="display:block;width:100%">
+              <g style="transform-origin:150px 110px;animation:atlasSway 4.5s ease-in-out infinite">
+                <rect x="96" y="70" width="108" height="40" fill="#C05B1D"></rect>
+                <rect x="78" y="86" width="24" height="24" fill="#8E1F12"></rect><rect x="198" y="86" width="24" height="24" fill="#8E1F12"></rect>
+                <polygon points="90,70 150,42 210,70" fill="#e3ddd4"></polygon>
+                <polygon points="72,86 90,72 90,86" fill="#cfc7bc"></polygon><polygon points="228,86 210,72 210,86" fill="#cfc7bc"></polygon>
+                <rect x="142" y="86" width="16" height="24" fill="#201e1d"></rect>
+                <rect x="149" y="30" width="2" height="14" fill="#F7F6F3"></rect><polygon points="151,30 168,35 151,40" fill="#F7F6F3"></polygon>
+              </g>
+            </svg>
+          </sc-if>
+          <sc-if value="{{ mFlows }}" hint-placeholder-val="{{ false }}">
+            <svg viewBox="0 0 300 130" style="display:block;width:100%">
+              <path d="M28 34 L 150 74" fill="none" stroke="#C05B1D" stroke-width="2.5" stroke-dasharray="7 7" style="animation:atlasFlow 1s linear infinite"></path>
+              <path d="M28 100 L 150 74" fill="none" stroke="#C29A2B" stroke-width="2.5" stroke-dasharray="7 7" style="animation:atlasFlow 1.2s linear infinite"></path>
+              <path d="M150 74 L 276 66" fill="none" stroke="#8E1F12" stroke-width="3" stroke-dasharray="8 8" style="animation:atlasFlow .9s linear infinite"></path>
+              <g style="offset-path:path('M28 34 L 150 74');animation:atlasMove 3.6s linear infinite">
+                <rect x="-6" y="-4" width="10" height="5" rx="1" fill="#C29A2B"></rect><circle cx="-4" cy="2.5" r="1.8" fill="#F7F6F3"></circle><circle cx="2" cy="2.5" r="1.8" fill="#F7F6F3"></circle><rect x="4.5" y="-3.5" width="4" height="4.5" rx="1" fill="#8a5a34"></rect>
+              </g>
+              <g style="offset-path:path('M28 100 L 150 74');animation:atlasMove 4.6s linear infinite">
+                <circle cx="0" cy="-5" r="2.2" fill="#F7F6F3"></circle><rect x="-1.1" y="-3" width="2.2" height="6" rx="1" fill="#F7F6F3"></rect>
+              </g>
+              <circle cx="28" cy="34" r="5" fill="#F7F6F3"></circle><circle cx="28" cy="100" r="5" fill="#F7F6F3"></circle>
+              <circle cx="150" cy="74" r="9" fill="#C05B1D" style="transform-origin:150px 74px;animation:atlasBeat 1.6s ease-in-out infinite"></circle>
+              <circle cx="276" cy="66" r="6" fill="#8E1F12"></circle>
+            </svg>
+          </sc-if>
+          <sc-if value="{{ mMarket }}" hint-placeholder-val="{{ false }}">
+            <svg viewBox="0 0 300 130" style="display:block;width:100%">
+              <rect x="132" y="52" width="36" height="36" fill="#C05B1D"></rect>
+              <circle cx="90" cy="46" r="7" fill="#C29A2B" style="transform-origin:90px 46px;animation:atlasBeat 1.4s ease-in-out infinite"></circle>
+              <circle cx="210" cy="46" r="7" fill="#C29A2B" style="transform-origin:210px 46px;animation:atlasBeat 1.4s .2s ease-in-out infinite"></circle>
+              <circle cx="78" cy="96" r="7" fill="#5B6B3C" style="transform-origin:78px 96px;animation:atlasBeat 1.4s .4s ease-in-out infinite"></circle>
+              <circle cx="222" cy="96" r="7" fill="#5B6B3C" style="transform-origin:222px 96px;animation:atlasBeat 1.4s .6s ease-in-out infinite"></circle>
+              <circle cx="150" cy="104" r="7" fill="#8E1F12" style="transform-origin:150px 104px;animation:atlasBeat 1.4s .8s ease-in-out infinite"></circle>
+            </svg>
+          </sc-if>
+          <sc-if value="{{ mSh }}" hint-placeholder-val="{{ false }}">
+            <svg viewBox="0 0 300 130" style="display:block;width:100%">
+              <path d="M20 96 Q 150 96 280 40" fill="none" stroke="#3a3734" stroke-width="14" stroke-linecap="round"></path>
+              <path d="M20 96 Q 150 96 280 40" fill="none" stroke="#C05B1D" stroke-width="10" stroke-linecap="round" stroke-dasharray="340" style="animation:atlasDraw 1.8s ease both"></path>
+              <path d="M20 96 Q 150 96 280 40" fill="none" stroke="#F7F6F3" stroke-width="2" stroke-dasharray="10 12" style="animation:atlasFlow 1.1s linear infinite"></path>
+            </svg>
+          </sc-if>
+          <sc-if value="{{ mAll }}" hint-placeholder-val="{{ false }}">
+            <svg viewBox="0 0 300 130" style="display:block;width:100%">
+              <path d="M20 100 L 280 100" fill="none" stroke="#8E1F12" stroke-width="6" stroke-dasharray="280" style="animation:atlasDraw 1.4s ease both"></path>
+              <path d="M150 100 L 90 44" fill="none" stroke="#C05B1D" stroke-width="4" stroke-dasharray="90" style="animation:atlasDraw 1.4s .5s ease both"></path>
+              <path d="M150 100 L 230 40" fill="none" stroke="#C29A2B" stroke-width="3" stroke-dasharray="110" style="animation:atlasDraw 1.4s .9s ease both"></path>
+              <circle cx="150" cy="100" r="7" fill="#F7F6F3"></circle><circle cx="90" cy="44" r="5" fill="#C05B1D"></circle><circle cx="230" cy="40" r="5" fill="#C29A2B"></circle>
+            </svg>
+          </sc-if>
+          <sc-if value="{{ mModern }}" hint-placeholder-val="{{ false }}">
+            <svg viewBox="0 0 300 130" style="display:block;width:100%">
+              <g style="transform-origin:150px 65px;animation:atlasWiden 1.4s ease both">
+                <rect x="20" y="52" width="260" height="26" fill="#3a3734"></rect>
+                <rect x="20" y="63" width="260" height="4" fill="#F7F6F3"></rect>
+              </g>
+              <rect x="30" y="57" width="24" height="6" fill="#C05B1D" style="animation:atlasFlow 1s linear infinite"></rect>
+              <rect x="30" y="68" width="24" height="6" fill="#C29A2B" style="animation:atlasFlow 1.3s linear infinite"></rect>
+            </svg>
+          </sc-if>
+        </div>
+        <div style="padding:12px 18px 16px;font-size:12.5px;color:#5c4326;line-height:1.55">{{ pChange }}</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isRoadCard }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:44px;top:162px;z-index:5;width:300px;pointer-events:none">
+      <div style="background:rgba(247,246,243,.96);border:2px solid var(--color-divider);box-shadow:var(--shadow-md);pointer-events:auto;animation:atlasRise .5s both">
+        <div style="padding:16px 18px 0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:{{ raColor }}">{{ raClass }}</div>
+        <div style="padding:2px 18px 6px;font-family:var(--font-heading);font-weight:600;font-size:19px;letter-spacing:-.01em;line-height:1.1">{{ raName }}</div>
+        <div key="{{ raKey }}" style="background:#201e1d;padding:16px 0 8px">
+          <svg viewBox="0 0 300 92" style="display:block;width:100%">
+            <line x1="8" y1="46" x2="292" y2="46" stroke="{{ raColor }}" stroke-width="26" stroke-linecap="round"></line>
+            <line x1="8" y1="46" x2="292" y2="46" stroke="#F7F6F3" stroke-width="2" stroke-dasharray="14 12" style="animation:atlasFlow 1s linear infinite"></line>
+            <polygon points="291,34 300,46 291,58" fill="{{ raColor }}"></polygon>
+            <polygon points="9,34 0,46 9,58" fill="{{ raColor }}"></polygon>
+            <rect x="-7" y="-3.5" width="15" height="7" rx="1" fill="#F7F6F3" style="offset-path:path('M14 39 L286 39');animation:atlasMove 2.6s linear infinite"></rect>
+            <rect x="-7" y="-3.5" width="15" height="7" rx="1" fill="#C29A2B" style="offset-path:path('M286 53 L14 53');animation:atlasMoveR 3.3s linear infinite"></rect>
+            <text x="10" y="82" fill="#cfc7bc" font-size="11" font-family="Archivo" letter-spacing="1">◀ {{ raFrom }}</text>
+            <text x="290" y="82" text-anchor="end" fill="#cfc7bc" font-size="11" font-family="Archivo" letter-spacing="1">{{ raTo }} ▶</text>
+          </svg>
+        </div>
+        <div style="padding:12px 18px 16px;display:flex;gap:16px;border-top:1px solid var(--color-neutral-300)">
+          <div style="flex:1"><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Direction</div><div style="font-size:13px;font-weight:600;margin-top:2px">{{ raFrom }} — {{ raTo }}</div></div>
+          <div style="flex:1"><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Carriageway</div><div style="font-size:13px;font-weight:600;margin-top:2px">{{ raWidth }}</div></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isCh5 }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:44px;bottom:44px;z-index:4;width:236px;pointer-events:none">
+      <div style="background:rgba(247,246,243,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--color-divider);box-shadow:var(--shadow-sm);padding:16px 18px">
+        <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Elevation · metres a.s.l.</div>
+        <div style="display:flex;gap:12px">
+          <div style="width:22px;height:150px;background:linear-gradient(to top,#6f9a5a 0%,#93b06a 22%,#c8c079 46%,#dab269 64%,#c88a4e 82%,#7d4428 100%);border:1px solid var(--color-divider);flex-shrink:0"></div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-family:var(--font-heading);font-weight:600;font-size:11.5px;color:var(--color-neutral-700)">
+            <div>290 m — high ridge</div>
+            <div>220 m</div>
+            <div>160 m</div>
+            <div>100 m</div>
+            <div>40 m — valley floor</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:14px"><span style="width:26px;height:0;border-top:2.2px solid #6f4326"></span><span style="font-size:12px">Index contour (100 m, labelled)</span></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:6px"><span style="width:26px;height:0;border-top:1px solid rgba(138,106,74,.55)"></span><span style="font-size:12px">Intermediate (20 m)</span></div>
+        <div style="font-size:10.5px;color:var(--color-neutral-600);margin-top:10px;line-height:1.45">20 m contour survey. Toggle elevation bands in the sidebar.</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showTourImg }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:44px;bottom:150px;z-index:6;width:300px;pointer-events:auto;animation:atlasPop .5s ease both">
+      <div style="animation:atlasBob 6s ease-in-out infinite">
+        <div style="background:#F7F6F3;border:2px solid var(--color-divider);box-shadow:var(--shadow-lg)">
+          <div class="grayscale" style="width:100%;height:186px;position:relative;background:#201e1d">{{ tourImgEl }}</div>
+          <div style="padding:12px 15px 14px">
+            <div style="font-family:var(--font-heading);font-weight:600;font-size:15px;letter-spacing:-.01em">{{ tourName }}</div>
+            <div style="font-size:11.5px;color:var(--color-neutral-600);margin-top:3px;line-height:1.4">{{ tourMeta }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasDetail }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:0;right:0;bottom:0;z-index:6;background:rgba(247,246,243,.97);border-top:2px solid var(--color-divider);pointer-events:auto;animation:atlasRise .3s both">
+      <div style="display:flex;align-items:flex-start;gap:36px;padding:18px 44px 22px">
+        <div style="min-width:230px;max-width:280px">
+          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:{{ detailAccent }};margin-bottom:5px">{{ detailKicker }}</div>
+          <div style="font-family:var(--font-heading);font-weight:600;font-size:23px;letter-spacing:-.01em;line-height:1.1">{{ detailTitle }}</div>
+          <sc-if value="{{ detailSub }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--color-neutral-600);margin-top:4px">{{ detailSub }}</div></sc-if>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px 28px;flex:1;padding-top:3px;max-height:26vh;overflow-y:auto">
+          <sc-for list="{{ detailRows }}" as="dr" hint-placeholder-count="4">
+            <div style="max-width:360px">
+              <div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">{{ dr.label }}</div>
+              <div style="font-size:14px;font-weight:500;margin-top:3px;line-height:1.4">{{ dr.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <button class="btn btn-ghost" onClick="{{ closeDetail }}" style="margin-top:2px">Close ✕</button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;cameraDrift&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Opening&quot;}, &quot;basemapOpacity&quot;: {&quot;editor&quot;: &quot;range&quot;, &quot;default&quot;: 0.5, &quot;min&quot;: 0, &quot;max&quot;: 1, &quot;step&quot;: 0.05, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Cartography&quot;}}">
+class Component extends DCLogic {
+  state = { scene: 'landing', mapStatus: 'Loading cartography…', stage: 0, showFacts: false, detail: null, counts: {}, period: 0, route: null, tourist: null, dest: null, folded: {}, mapReady: false, proposedOnly: false, hideUI: false, videoMode: false, videoT: 0, intro: false, introLabel: '', introSub: '', layers: { junctions: true, stand: true, stops: true, rings: false, landmarks: true, routes: true, wards: true, tourist: true, tvmRadius: true, markets: true, dests: true, contours: true, contourRoads: false, wardsTopo: true, cb0: true, cb1: true, cb2: true, cb3: true, water: true } };
+  RIVER_INFO = { 'Killi River': {
+    also: 'Killiyar · കിള്ളിയാർ', part: 'Karamana River basin',
+    rises: 'Theerthankara, near Panavur — Nedumangad taluk',
+    mouth: 'Joins the Karamana River at Pallathukadavu → Arabian Sea at Kovalam',
+    dir: 'North-east → south-west',
+    len: '≈ 22–24 km (largest tributary of the Karamana)',
+    drains: 'Drains the Nedumangad forest; basin rich in bird life',
+    downstream: 'Enters Thiruvananthapuram city at Vazhayila → Mannammoola · Maruthankuzhi · Jagathi · Attukal · Kalady South',
+  } };
+  CONTOUR_BANDS = [{ k: 'cb0', label: '40 – 100 m', min: 40, max: 100, sw: '#7c9b57' }, { k: 'cb1', label: '100 – 160 m', min: 100, max: 160, sw: '#c3ba7a' }, { k: 'cb2', label: '160 – 220 m', min: 160, max: 220, sw: '#c99a5f' }, { k: 'cb3', label: '220 – 290 m', min: 220, max: 9999, sw: '#824f2e' }];
+  CENTER = [77.0023, 8.6119];
+  TOWN = [77.0016, 8.6043];
+  SITE = [77.0016, 8.6043];
+  BOUNDS = [[76.9556, 8.5822], [77.0491, 8.6416]];
+  TVM = [76.9366, 8.5241];
+  INDIA_RING = [[68.2,23.7],[70,22],[72.6,20],[73,16],[74,14.5],[75.8,12],[77.5,8.1],[79,9.5],[80.3,13],[80.3,16],[82,17],[84,18.5],[86.5,20.5],[88,21.7],[89,22],[91,22.5],[92.7,24],[94,27],[92,27.5],[89,26],[88,26.7],[85,27],[81,30],[78,31.5],[75.5,32.5],[74,34.5],[73,34],[71,32],[70,28],[68.2,23.7]];
+  SOUTH_RING = [[73,16],[74,14.5],[75.8,12],[77.5,8.1],[79,9.5],[80.3,13],[80.3,16],[78,16.5],[75.5,16],[73,16]];
+  STAGES = [
+    { label: 'India', note: 'The journey begins at the scale of the subcontinent.', center: [80.5, 22.0], zoom: 3.4, dur: 4000, geoKey: 'india' },
+    { label: 'South India', note: 'Moving down the peninsula toward the Western Ghats.', center: [77.6, 12.0], zoom: 5.0, dur: 3600, geoKey: 'south' },
+    { label: 'Kerala', note: 'A narrow coastal state between the Ghats and the Arabian Sea.', center: [76.3, 10.3], zoom: 6.2, dur: 3600, geoKey: 'kerala' },
+    { label: 'Thiruvananthapuram District', note: 'The southern-most district of Kerala.', center: [76.98, 8.58], zoom: 9.3, dur: 4000, geoKey: 'district' },
+    { label: 'Nedumangad Taluk', note: 'Inland, in the foothills north-east of the capital city — Nedumangad municipality sits at its core.', center: [77.03, 8.66], zoom: 10.6, dur: 4000, geoKey: 'taluk' },
+    { label: 'Nedumangad Municipality', note: 'The municipal boundary — the authoritative extent of this study. The atlas holds here, and the road story begins.', center: [77.0023, 8.6119], zoom: 12.2, dur: 4200, geoKey: 'municipality' },
+  ];
+  CLASSES = { nh: ['National Highway', '#8E1F12'], sh: ['State Highway', '#C05B1D'], mdr: ['Major District Road', '#C29A2B'], municipal: ['Municipal Road', '#4B4845'], local: ['Local Road', '#B4B0AA'] };
+  PERIODS = [
+    { years: 'Before 1600', title: 'Neduman Kaadu', act: 'trails', note: 'The name Nedumangad is read as Neduman Kaadu — the "long forest". Movement is by footpath and cart track along ridgelines and stream valleys between the Ghats foothills and the coastal plain; permanent settlement is thin.', change: 'No formal roads yet — only forest trails threading the hills toward the plains.' },
+    { years: '1677 – 1684', title: 'The Queen at Koyikkal', act: 'palace', img: 'assets/img/hist_palace.png', imgCap: 'Koyikkal court & village — interpretive reconstruction', note: 'Umayamma Rani of Venad establishes a court at Koyikkal Palace, a Kerala-style nālukettu with a slanted-roof hall. Artisans, weavers and goldsmiths settle around it; the palace anchors the first true nucleus of the town.', change: 'A royal seat becomes the town\u2019s first fixed centre of gravity.' },
+    { years: '1700s – 1800s', title: 'The Hill Trade', act: 'flows', img: 'assets/img/hist_flows.png', imgCap: 'Hill produce reaching the market — interpretive reconstruction', note: 'Pepper, arecanut, ginger and honey come down from the Ghats — Vithura, Ponmudi and Palode — and gather at the Nedumangad chantha before moving on to Thiruvananthapuram, with a second axis running across the Ghats toward Tenkasi.', change: 'Three trade axes converge on the market — the geometry the road network still follows.' },
+    { years: 'Early 1900s', title: 'The Chantha Opens', act: 'market', img: 'assets/img/hist_market.jpeg', imgCap: 'The chantha in full trade — interpretive reconstruction', note: 'Social-reform struggles of the early twentieth century open the market and its approach roads to all communities. The chantha grows into the largest market in the district, pulling weekly footfall from every direction.', change: 'The market\u2019s pull fixes where roads must lead — inward, from all sides.' },
+    { years: '1900 – 1950', title: 'The Road Era', act: 'sh', note: 'Cart tracks are surveyed and metalled into the Thiruvananthapuram–Tenkasi road — today\u2019s SH-2 — the town\u2019s first engineered spine. The earliest motor-bus services reach Nedumangad along it.', change: 'The first engineered highway is drawn — the spine everything else hangs from.' },
+    { years: '1950 – 2000', title: 'Taluk Headquarters', act: 'all', note: 'Nedumangad becomes a taluk headquarters and later a municipal town. The full hierarchy sets in: state highways, major district roads, municipal roads and dense residential streets, with a bus stand at the core.', change: 'A complete road hierarchy fills in around the SH spine.' },
+    { years: '2000 – 2026', title: 'Four-Lane Future', act: 'modern', note: 'Four-laning of the Vazhayila–Nedumangad corridor, growing hill-tourism traffic toward Ponmudi, and commuter flow to the space campuses at Valiamala redraw the load on the network. Junctions, not just roads, become the pressure points.', change: 'Widening and new destinations shift the load onto the junctions.' },
+  ];
+  DESTS = [
+    { id: 'airport', cat: 'hub', name: 'Trivandrum Intl. Airport', km: 27.8, min: 38, about: 'Trivandrum International Airport (TRV), Chackai — the region\u2019s only airport.' },
+    { id: 'chalai', cat: 'market', name: 'Chalai Market', km: 18.3, min: 26, about: 'Chalai Bazaar — the largest traditional market in Thiruvananthapuram city.' },
+    { id: 'palayam', cat: 'market', name: 'Palayam (Connemara) Market', km: 16.3, min: 23, about: 'Historic covered market beside the city centre and Secretariat.' },
+    { id: 'panachamoodu', cat: 'market', name: 'Panachamoodu Public Market', km: 36.6, min: 34, about: 'Public market on the eastern approach.' },
+    { id: 'neyyattinkara', cat: 'market', name: 'Neyyattinkara Fish Market', km: 30.6, min: 32, about: 'Major wholesale fish trade on the southern corridor.' },
+    { id: 'padmanabha', cat: 'landmark', name: 'Sree Padmanabhaswamy Temple', km: 26.4, min: 31, about: 'East Fort — the city\u2019s principal landmark and pilgrimage site.' },
+    { id: 'iist', cat: 'landmark', name: 'IIST — Space University', km: 5.6, min: 7, img: 'assets/img/iist.jpg', about: 'Indian Institute of Space Science & Technology, Valiamala — India\u2019s space university.' },
+  ];
+  DEST_COLOR = { hub: '#4A6B8A', market: '#C29A2B', landmark: '#201e1d', trade: '#8E1F12' };
+  CHAPTERS = {
+    ch1: { kicker: 'Chapter 01', title: 'Network & Junctions', desc: 'The living road network — hierarchy, named junctions, bus stand and stops. Click any feature for details.' },
+    ch2: { kicker: 'Chapter 02', title: 'Historical Evolution', desc: 'From forest trails and the Koyikkal court to the four-lane future — step the timeline; each step plays a short motion study.' },
+    ch3: { kicker: 'Chapter 03', title: 'Access & Modern Transport', desc: 'Reach by road to the airport, city markets and landmarks; a blue radius to Thiruvananthapuram, walking-time rings and markets in reach.' },
+    ch4: { kicker: 'Chapter 04', title: 'Wards, Routes & Region', desc: 'Bus corridors in and out, the wards and roads they touch, and tourist places within reach — with images.' },
+    ch5: { kicker: 'Chapter 05', title: 'Topography', desc: 'The 20 m contour surface. Everything else is off by default — toggle layers on as needed.' },
+  };
+  ROUTES = [
+    { id: 'ponmudi', file: 'corr_ponmudi', name: 'Nedumangad ↔ Vithura ↔ Ponmudi', color: '#8E1F12', dir: 'In & out — east · hill corridor', via: 'Thiruvananthapuram → Town → Vithura → Ponmudi', serves: 'Town core · Karippur · Manoorkonam · Vithura', roads: 'Thiruvananthapuram–Ponmudi road · SH2 town spine', coords: [] },
+    { id: 'thenkasi', file: 'corr_thenkasi', name: 'Nedumangad ↔ Palode ↔ Tenkasi', color: '#C05B1D', dir: 'In & out — north-east · SH2', via: 'Thiruvananthapuram → Town → Kallampara → Anad → Palode → Tenkasi', serves: 'Town core · Netta · Kallampara · Pazhakutty · Anad', roads: 'SH2 Thiruvananthapuram–Tenkasi', coords: [] },
+    { id: 'airport', file: 'route_airport', name: 'Nedumangad ↔ Trivandrum Airport', color: '#4A6B8A', dir: 'In & out — south-west', via: 'Town → Karakulam → Peroorkada → City → Airport', roads: 'Town spine · city arterials to Chackai', serves: 'Town core · Karakulam · city corridor', coords: [] },
+  ];
+  MARKETS = [
+    { key: 'chantha', name: 'Nedumangad Market (Chantha)', c: [77.0028, 8.6033], about: 'The largest market in Thiruvananthapuram district.' },
+    { key: 'peroorkada', name: 'Peroorkada Market', c: [76.9662, 8.5363] },
+    { key: 'vattiyoorkavu', name: 'Vattiyoorkavu Market', c: [76.9888, 8.5252] },
+  ];
+  TOURIST = [
+    { key: 'koyikkal', name: 'Koyikkal Palace', c: [77.002896, 8.609251], img: 'assets/img/koyikkal.jpg', d: 'In town', note: '17th-century palace of Umayamma Rani — folklore & numismatics museum', via: 'Town core, off Market Junction' },
+    { key: 'ponmudi', name: 'Ponmudi Hill Station', c: [77.11483, 8.76003], img: 'assets/img/ponmudi.jpeg', d: '≈ 38 km NE', note: 'The "Golden Peak" hill resort at ≈1,100 m', via: 'Ponmudi corridor via Vithura' },
+    { key: 'meenmutty', name: 'Meenmutty Falls, Kallar', c: [77.14502, 8.71223], img: 'assets/img/meenmutty.jpeg', d: '≈ 30 km NE', note: 'Waterfall trek from Kallar', via: 'Ponmudi corridor via Vithura' },
+    { key: 'goldenvalley', name: 'Golden Valley, Vithura', c: [77.12607, 8.71920], img: 'assets/img/goldenvalley.jpeg', d: '≈ 28 km NE', note: 'Forest station & river pools near Vithura', via: 'Ponmudi corridor via Vithura' },
+    { key: 'mankayam', name: 'Mankayam Falls', c: [77.06320, 8.75561], img: 'assets/img/mankayam.jpeg', d: '≈ 25 km N', note: 'Eco-tourism site in the Palode reserve', via: 'SH2 corridor via Palode' },
+    { key: 'vazhvanthol', name: 'Vazhvanthol Falls, Vithura', c: [77.16352, 8.67460], img: 'assets/img/vazhvanthol.jpeg', d: '≈ 15 km E', note: 'Seasonal falls in the Peppara buffer', via: 'Eastern road via Karippur' },
+    { key: 'peppara', name: 'Peppara Dam Reservoir', c: [77.14997, 8.63357], img: 'assets/img/peppara.jpg', d: '≈ 22 km E', note: 'Wildlife sanctuary & dam', via: 'Ponmudi corridor via Vithura' },
+  ];
+
+  km(a, b) { const lat0 = (a[1] + b[1]) / 2 * Math.PI / 180, kx = 111.32 * Math.cos(lat0), ky = 110.57; const dx = (a[0] - b[0]) * kx, dy = (a[1] - b[1]) * ky; return Math.sqrt(dx * dx + dy * dy); }
+  decimate(coords, max) { if (!coords || coords.length <= max) return coords || []; const step = Math.ceil(coords.length / max); const out = coords.filter((_, i) => i % step === 0); if (out[out.length - 1] !== coords[coords.length - 1]) out.push(coords[coords.length - 1]); return out; }
+  polyFeat(ring) { return { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [ring] } }; }
+
+  renderVals() {
+    const s = this.state;
+    const ch = this.CHAPTERS[s.scene];
+    const f = s.folded;
+    const backMap = { context: 'Home', main: 'Home', ch1: 'Chapters', ch2: 'Chapters', ch3: 'Chapters', ch4: 'Chapters', ch5: 'Chapters' };
+    const p = this.PERIODS[s.period];
+    const tsel = s.tourist ? this.TOURIST.find((t) => t.key === s.tourist) : null;
+    let imgCard = null;
+    if ((s.scene === 'ch3' || s.scene === 'ch4') && tsel) imgCard = { img: tsel.img, name: tsel.name, meta: tsel.d + ' · ' + tsel.note };
+    else if (s.scene === 'ch3' && s.detail && s.detail.img) imgCard = { img: s.detail.img, name: s.detail.title, meta: s.detail.kicker };
+    const foldToggle = (k) => () => this.setState((st) => ({ folded: { ...st.folded, [k]: !st.folded[k] } }));
+    const uiHidden = s.hideUI || s.videoMode;
+    return {
+      isLanding: s.scene === 'landing', isContext: s.scene === 'context', isMain: s.scene === 'main',
+      inChapter: !!ch && !uiHidden, isCh2: s.scene === 'ch2' && !uiHidden, isCh2Scene: s.scene === 'ch2', isCh3: s.scene === 'ch3', isCh4: s.scene === 'ch4', isCh5: s.scene === 'ch5' && !uiHidden,
+      open: { timeline: !f.timeline, layers: !f.layers, roads: !f.roads, corridors: !f.corridors, tourist: !f.tourist, dests: !f.dests },
+      chev: { timeline: f.timeline ? '▸' : '▾', layers: f.layers ? '▸' : '▾', roads: f.roads ? '▸' : '▾', corridors: f.corridors ? '▸' : '▾', tourist: f.tourist ? '▸' : '▾', dests: f.dests ? '▸' : '▾' },
+      fold: { timeline: foldToggle('timeline'), layers: foldToggle('layers'), roads: foldToggle('roads'), corridors: foldToggle('corridors'), tourist: foldToggle('tourist'), dests: foldToggle('dests') },
+      routes: this.ROUTES.map((r) => ({ name: r.name, dir: r.dir, color: r.color, bar: s.route === r.id ? '#201e1d' : 'transparent', bg: s.route === r.id ? 'rgba(32,30,29,.07)' : 'transparent', fg: '#201e1d', onPick: () => this.pickRoute(r.id) })),
+      tourist: this.TOURIST.map((t) => ({ name: t.name, d: t.d, bg: s.tourist === t.key ? 'rgba(91,107,60,.14)' : 'none', onPick: () => this.pickTourist(t) })),
+      dests: this.DESTS.map((d) => ({ name: d.name, cat: d.cat, color: this.DEST_COLOR[d.cat], trip: d.km + ' km · ' + d.min + ' min', bar: s.dest === d.id ? '#201e1d' : 'transparent', bg: s.dest === d.id ? 'rgba(32,30,29,.07)' : 'none', onPick: () => this.openDest(d.id) })),
+      chKicker: ch ? ch.kicker : '', chTitle: ch ? ch.title : '', chDesc: ch ? ch.desc : '',
+      topRight: ch ? ch.title : s.scene === 'context' ? 'Geographical Context' : s.scene === 'main' ? 'Chapters' : 'Interactive Digital Atlas',
+      mapStatus: s.mapStatus, mapReady: s.mapReady, notReady: !s.mapReady,
+      showFold: this.inChapterScene() && s.mapReady,
+      showMapTools: this.inChapterScene() && s.mapReady && !s.videoMode,
+      hideUI: s.hideUI, onHideUI: () => this.toggleHideUI(), foldLabel: s.hideUI ? 'Show panels' : 'Clean map', foldGlyph: s.hideUI ? '▣' : '▤',
+      waterOn: s.layers.water, onWater: () => this.toggleWater(),
+      waterBg: s.layers.water ? '#1c6fb0' : 'rgba(247,246,243,.95)', waterFg: s.layers.water ? '#F7F6F3' : '#201e1d', waterDot: s.layers.water ? '#F7F6F3' : '#1c6fb0',
+      waterLabel: s.layers.water ? 'Rivers · on' : 'Rivers & water',
+      proposedOn: s.proposedOnly, onProposed: () => this.toggleProposed(),
+      proposedBg: s.proposedOnly ? '#8E1F12' : 'rgba(247,246,243,.95)', proposedFg: s.proposedOnly ? '#F7F6F3' : '#201e1d', proposedDot: s.proposedOnly ? '#F7F6F3' : '#ec3013',
+      proposedLabel: s.proposedOnly ? 'Proposed · ORR' : 'Proposed roads',
+      videoMode: s.videoMode, onOpenVideo: () => this.openVideoMode(), onCloseVideo: () => this.closeVideoMode(),
+      onScrub: (e) => this.scrubVideo(parseFloat(e.target.value) / 1000), videoTVal: Math.round(s.videoT * 1000),
+      videoYear: Math.round(1600 + s.videoT * 426), videoPhase: ['Forest trails & footpaths', 'Roads, trade & the market', 'The modern network'][Math.min(2, Math.floor(s.videoT * 3))],
+      showBack: s.scene !== 'landing', backLabel: backMap[s.scene] || 'Back',
+      onBack: () => this.goBack(), onBegin: () => this.beginContext(), onSkip: () => this.skipIntro(), onGo: () => this.goScene('main'), onReplay: () => this.beginContext(),
+      showDeselect: this.inChapterScene(), onDeselectAll: () => this.closeSelection(),
+      stageLabel: this.STAGES[s.stage].label, stageNote: this.STAGES[s.stage].note,
+      showFacts: s.showFacts,
+      isIntro: s.scene === 'context' && s.intro, introDone: s.scene === 'context' && !s.intro,
+      introLabel: s.introLabel, introSub: s.introSub,
+      facts: (this.factList || []).map((ff, i) => ({ ...ff, delay: (i * 0.12) + 's' })),
+      menu: [
+        { num: '01', title: 'Network & Junctions', desc: 'Road hierarchy · junction details · bus stand & stops', sc: 'ch1' },
+        { num: '02', title: 'Historical Evolution', desc: 'Timeline 1600–2026 · motion studies · trade routes', sc: 'ch2' },
+        { num: '03', title: 'Access & Modern Transport', desc: 'Road travel-times · Trivandrum radius · markets in reach', sc: 'ch3' },
+        { num: '04', title: 'Wards, Routes & Region', desc: 'Bus corridors · ward connectivity · tourist images', sc: 'ch4' },
+        { num: '05', title: 'Topography', desc: '20 m contours · index lines · elevation labels', sc: 'ch5' },
+      ].map((m, i) => ({ ...m, delay: (0.15 + i * 0.09) + 's', onEnter: () => this.goScene(m.sc) })),
+      periods: this.PERIODS.map((pp, i) => ({ years: pp.years, title: pp.title, bar: i === s.period ? '#8E1F12' : 'transparent', bg: i === s.period ? '#201e1d' : 'transparent', fg: i === s.period ? '#F7F6F3' : '#201e1d', onPick: () => this.pickPeriod(i) })),
+      pYears: p.years, pTitle: p.title, pChange: p.change, motionKey: 'm' + s.period,
+      pImgEl: p.img ? React.createElement('img', { src: p.img, alt: p.title, style: { width: '100%', height: '150px', objectFit: 'cover', display: 'block' } }) : null,
+      pImgCap: p.imgCap || '', pHasImg: !!p.img,
+      mTrails: p.act === 'trails', mPalace: p.act === 'palace', mFlows: p.act === 'flows', mMarket: p.act === 'market', mSh: p.act === 'sh', mAll: p.act === 'all', mModern: p.act === 'modern',
+      showToggles: s.scene === 'ch1' || s.scene === 'ch3' || s.scene === 'ch4' || s.scene === 'ch5',
+      showHierarchy: this.inChapterScene() && s.scene !== 'ch5',
+      showWardNotice: (s.scene === 'ch1' || s.scene === 'ch4') && !this.hasWards,
+      toggles: this.toggleList(),
+      legend: Object.entries(this.CLASSES).map(([k, [label, color]]) => ({ label, color, count: s.counts[k] != null ? String(s.counts[k]) : '' })),
+      hint: s.scene === 'ch2' ? 'The base network stays for reference — highlighted layers change with the timeline.' : s.scene === 'ch4' ? 'Pick a corridor or place, or click wards, routes, roads and points.' : s.scene === 'ch3' ? 'Pick a destination to trace its road route. Distances measured from the town core.' : 'Hover a road to highlight it. Click roads, junctions or stops for details.',
+      showTourImg: false,
+      tourName: imgCard ? imgCard.name : '', tourMeta: imgCard ? imgCard.meta : '',
+      tourImgEl: imgCard ? React.createElement('img', { src: imgCard.img, alt: imgCard.name, style: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' } }) : null,
+      isRoadCard: !!(s.detail && s.detail.kind === 'road' && s.detail.anim) && !uiHidden,
+      raColor: s.detail && s.detail.anim ? s.detail.anim.color : '#4B4845',
+      raName: s.detail && s.detail.anim ? s.detail.anim.name : '',
+      raClass: s.detail && s.detail.anim ? s.detail.anim.klass : '',
+      raWidth: s.detail && s.detail.anim ? s.detail.anim.width : '',
+      raFrom: s.detail && s.detail.anim ? s.detail.anim.fromDir : '',
+      raTo: s.detail && s.detail.anim ? s.detail.anim.toDir : '',
+      raKey: s.detail && s.detail.anim ? ('r' + s.detail.title) : 'r',
+      hasDetail: !!s.detail && !uiHidden,
+      detailKicker: s.detail ? s.detail.kicker : '', detailTitle: s.detail ? s.detail.title : '',
+      detailSub: s.detail ? (s.detail.sub || '') : '', detailAccent: s.detail ? s.detail.accent : '',
+      detailRows: s.detail ? s.detail.rows : [],
+      closeDetail: () => this.closeSelection(),
+    };
+  }
+
+  toggleList() {
+    const s = this.state, L = s.layers;
+    const mk = (key, label, swatch, round, count) => ({ label, swatch, round, count: count != null ? String(count) : '', boxBg: L[key] ? '#201e1d' : 'transparent', onToggle: () => { this.setState({ layers: { ...L, [key]: !L[key] } }, () => this.applyLayerVisibility()); } });
+    if (s.scene === 'ch5') {
+      const out = [mk('contours', 'Contours (20 m)', '#8a6a4a', '0', null)];
+      this.CONTOUR_BANDS.forEach((b) => out.push(mk(b.k, b.label, b.sw, '0', null)));
+      if (this.hasWards) out.push(mk('wardsTopo', 'Ward boundaries', '#5B6B3C', '0', s.counts.wards));
+      out.push(mk('contourRoads', 'Roads (context)', '#4B4845', '0', null));
+      return out;
+    }
+    if (s.scene === 'ch3') return [
+      mk('tvmRadius', 'Airport radius (≈22 km)', '#4A6B8A', '50%', null),
+      mk('dests', 'Road destinations', '#4A6B8A', '50%', this.DESTS.length),
+      mk('markets', 'Markets in reach', '#C29A2B', '0', this.MARKETS.length),
+      mk('rings', 'Walking-time rings', '#C05B1D', '50%', null),
+      mk('junctions', 'Junctions', '#ec3013', '50%', s.counts.junctions),
+    ];
+    if (s.scene === 'ch4') {
+      const out = [mk('routes', 'Bus corridors', '#8E1F12', '0', this.ROUTES.length), mk('tourist', 'Tourist places', '#5B6B3C', '50%', this.TOURIST.length), mk('junctions', 'Junctions', '#ec3013', '50%', s.counts.junctions)];
+      if (this.hasWards) out.splice(1, 0, mk('wards', 'Ward boundaries', '#201e1d', '0', s.counts.wards));
+      return out;
+    }
+    return [mk('junctions', 'Junctions', '#ec3013', '50%', s.counts.junctions), mk('stand', 'Bus stand', '#5B6B3C', '0', s.counts.stand), mk('stops', 'Bus stops', '#4A6B8A', '50%', s.counts.stops)];
+  }
+
+  detailRowsFromProps(p, extra) {
+    const rows = [];
+    const add = (label, v, suffix) => { if (v != null && v !== '' && v !== '?' && v !== 'null') rows.push({ label, value: String(v) + (suffix || '') }); };
+    if (extra) extra(add);
+    return rows;
+  }
+
+  componentDidMount() { this.whenMapLibre().then(() => this.initMap()); }
+  componentWillUnmount() { this._dead = true; clearTimeout(this._spinT); cancelAnimationFrame(this._dashRaf); cancelAnimationFrame(this._blinkRaf); cancelAnimationFrame(this._roadBlinkRaf); if (this.map) this.map.remove(); }
+  whenMapLibre() { return new Promise((res) => { const t = () => (window.maplibregl ? res() : setTimeout(t, 100)); t(); }); }
+
+  initMap() {
+    const map = this.map = new maplibregl.Map({
+      container: 'atlas-map',
+      style: {
+        version: 8,
+        glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+        sources: { carto: { type: 'raster', tileSize: 256, tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], attribution: '© OpenStreetMap contributors', maxzoom: 19 } },
+        layers: [
+          { id: 'bg', type: 'background', paint: { 'background-color': '#F7F6F3' } },
+          { id: 'basemap', type: 'raster', source: 'carto', paint: { 'raster-opacity': 0, 'raster-saturation': -1, 'raster-contrast': -0.1, 'raster-brightness-min': 0.35, 'raster-opacity-transition': { duration: 1600 } } },
+        ],
+      },
+      center: this.CENTER, zoom: 11.6, pitch: 48, bearing: -12, attributionControl: { compact: true }, fadeDuration: 500, preserveDrawingBuffer: true,
+    });
+    window.__atlas = this;
+    this.setInteractive(false);
+    map.on('load', () => this.onMapLoad());
+  }
+
+  setInteractive(on) { const m = this.map; ['scrollZoom', 'dragPan', 'dragRotate', 'doubleClickZoom', 'touchZoomRotate', 'keyboard'].forEach((h) => on ? m[h].enable() : m[h].disable()); }
+  async loadJSON(path) { return (await fetch(path)).json(); }
+
+  roadClass(p) {
+    const ref = (p.ref || '') + '';
+    if (p._proposed || /\bORR\b|outer ring/i.test((p.name || '') + '')) return 'nh';
+    if (/NH/i.test(ref)) return 'nh';
+    if (/SH/i.test(ref)) return 'sh';
+    if (/MDR/i.test(ref) || p.highway === 'secondary' || p.highway === 'primary') return 'mdr';
+    if (p.highway === 'tertiary' || p.highway === 'unclassified' || p.highway === 'road') return 'municipal';
+    if (p.highway === 'residential' || p.highway === 'living_street' || p.highway === 'service') return 'local';
+    return null;
+  }
+
+  computeFacts(boundary) {
+    let coords = boundary.features[0].geometry.type === 'MultiPolygon' ? boundary.features[0].geometry.coordinates[0][0] : boundary.features[0].geometry.coordinates[0];
+    const lat0 = this.CENTER[1] * Math.PI / 180, kx = 111.32 * Math.cos(lat0), ky = 110.57;
+    let a = 0;
+    for (let i = 0; i < coords.length - 1; i++) { const [x1, y1] = coords[i], [x2, y2] = coords[i + 1]; a += (x1 * kx) * (y2 * ky) - (x2 * kx) * (y1 * ky); }
+    const areaKm2 = Math.abs(a / 2);
+    const dx = (this.CENTER[0] - this.TVM[0]) * kx, dy = (this.CENTER[1] - this.TVM[1]) * ky;
+    this.factList = [
+      { label: 'State', value: 'Kerala' }, { label: 'District', value: 'Thiruvananthapuram' }, { label: 'Taluk', value: 'Nedumangad' },
+      { label: 'Coordinates', value: this.CENTER[1].toFixed(2) + '° N · ' + this.CENTER[0].toFixed(2) + '° E' },
+      { label: 'Area', value: areaKm2.toFixed(1) + ' km² (from boundary)' },
+      { label: 'Population', value: '60,161 (Census 2011)' },
+      { label: 'From the capital', value: '≈ ' + Math.round(Math.sqrt(dx * dx + dy * dy)) + ' km north-east of Thiruvananthapuram' },
+      { label: 'Connections', value: 'Thiruvananthapuram · Vithura / Ponmudi · Palode · Attingal' },
+    ];
+  }
+
+  circlePoly(center, km) { const lat0 = center[1] * Math.PI / 180, kx = 111.32 * Math.cos(lat0), ky = 110.57, pts = []; for (let i = 0; i <= 64; i++) { const t = i / 64 * Math.PI * 2; pts.push([center[0] + Math.cos(t) * km / kx, center[1] + Math.sin(t) * km / ky]); } return pts; }
+  destOf(coords) { const t = this.SITE; return this.km(coords[0], t) > this.km(coords[coords.length - 1], t) ? coords[0] : coords[coords.length - 1]; }
+
+  async onMapLoad() {
+    const map = this.map;
+    map.setPaintProperty('basemap', 'raster-opacity', this.props.basemapOpacity ?? 0.5);
+    const manifest = await this.loadJSON('data/manifest.json');
+    this.datasets = {};
+    for (const layer of manifest.layers) {
+      const fcs = (await Promise.all(layer.files.map((f) => this.loadJSON('data/' + f).catch(() => null)))).filter(Boolean);
+      if (!fcs.length && layer.optional) continue;
+      this.datasets[layer.id] = { role: layer.role, fc: { type: 'FeatureCollection', features: fcs.flatMap((g) => g.features || []) } };
+    }
+    this.junctionNotes = await this.loadJSON('data/junction_notes.json').catch(() => ({}));
+    const [kerala, district, taluk, contours, india, southIndia, chantha] = await Promise.all(['kerala', 'tvm_district', 'taluk', 'contours_clipped', 'india', 'south_india', 'chantha_border'].map((f) => this.loadJSON('data/' + f + '.geojson').catch(() => null)));
+    this.chanthaFC = chantha;
+    this.tRouteGeo = {};
+    await Promise.all(['ponmudi', 'meenmutty', 'goldenvalley', 'mankayam', 'vazhvanthol', 'peppara'].map(async (k) => { const g = await this.loadJSON('data/troute_' + k + '.geojson').catch(() => null); if (g && g.features && g.features[0]) this.tRouteGeo[k] = this.decimate(g.features[0].geometry.coordinates, 260); }));
+    this.mRouteGeo = {};
+    await Promise.all(['peroorkada', 'vattiyoorkavu'].map(async (k) => { const g = await this.loadJSON('data/mroute_' + k + '.geojson').catch(() => null); if (g && g.features && g.features[0]) this.mRouteGeo[k] = this.decimate(g.features[0].geometry.coordinates, 260); }));
+    await Promise.all(this.ROUTES.map(async (r) => { const g = await this.loadJSON('data/' + r.file + '.geojson').catch(() => null); if (g && g.features && g.features[0]) r.coords = this.decimate(g.features[0].geometry.coordinates, 320); }));
+    const routeFiles = { airport: 'route_airport', chalai: 'route_chalai', palayam: 'route_palayam', panachamoodu: 'route_panachamoodu', neyyattinkara: 'route_neyyattinkara', padmanabha: 'route_padmanabha', iist: 'route_iist', ponmudi: 'route_ponmudi', thenkasi: 'route_thenkasi' };
+    this.routeGeo = {};
+    await Promise.all(Object.entries(routeFiles).map(async ([k, f]) => { const g = await this.loadJSON('data/' + f + '.geojson').catch(() => null); if (g && g.features && g.features[0]) this.routeGeo[k] = this.decimate(g.features[0].geometry.coordinates, 200); }));
+    if (this._dead) return;
+
+    this.stageGeoData = {
+      india: india || this.polyFeat(this.INDIA_RING),
+      south: southIndia || this.polyFeat(this.SOUTH_RING),
+      kerala: (kerala && kerala.features[0]) || this.polyFeat(this.SOUTH_RING),
+      district: (district && district.features[0]) || this.polyFeat(this.SOUTH_RING),
+      taluk: (taluk && taluk.features[0]) || this.polyFeat(this.SOUTH_RING),
+      municipality: this.datasets.boundary.fc.features[0],
+    };
+
+    const boundary = this.datasets.boundary.fc;
+    this.computeFacts(boundary);
+    map.addSource('boundary', { type: 'geojson', data: boundary });
+    map.addLayer({ id: 'boundary-fill', type: 'fill', source: 'boundary', paint: { 'fill-color': '#F7F6F3', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 1800 } } });
+
+    const roads = this.datasets.roads.fc;
+    const counts = {};
+    roads.features.forEach((f) => { const c = this.roadClass(f.properties); f.properties._class = c; if (c) counts[c] = (counts[c] || 0) + 1; });
+    const drawable = { type: 'FeatureCollection', features: roads.features.filter((f) => f.properties._class) };
+    map.addSource('roads', { type: 'geojson', data: drawable, generateId: true });
+    const cls = ['get', '_class'];
+    const colorExpr = ['match', cls, 'nh', '#8E1F12', 'sh', '#C05B1D', 'mdr', '#C29A2B', 'municipal', '#4B4845', '#B4B0AA'];
+    map.addLayer({ id: 'roads-glow', type: 'line', source: 'roads', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': colorExpr, 'line-width': ['match', cls, 'nh', 10, 'sh', 9, 'mdr', 8, 7], 'line-blur': 4, 'line-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 0.55, 0] } });
+    map.addLayer({ id: 'roads-line', type: 'line', source: 'roads', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': colorExpr, 'line-width': ['match', cls, 'nh', 3.2, 'sh', 2.6, 'mdr', 1.8, 'municipal', 1.1, 0.7], 'line-opacity': 0, 'line-opacity-transition': { duration: 2200 } } });
+    map.addLayer({ id: 'boundary-line', type: 'line', source: 'boundary', paint: { 'line-color': '#201e1d', 'line-width': 2.2, 'line-opacity': 0, 'line-opacity-transition': { duration: 1800 } } });
+
+    // proposed road — Outer Ring Road (ORR) isolate layers (hidden until the toggle is pressed)
+    const orrFeats = drawable.features.filter((f) => f.properties._proposed);
+    this._orrBounds = null;
+    if (orrFeats.length) { let a = 1e9, b = 1e9, c2 = -1e9, d2 = -1e9; orrFeats.forEach((f) => this.lineCoords(f.geometry).forEach(([x, y]) => { a = Math.min(a, x); c2 = Math.max(c2, x); b = Math.min(b, y); d2 = Math.max(d2, y); })); this._orrBounds = [[a, b], [c2, d2]]; }
+    map.addSource('orr', { type: 'geojson', data: { type: 'FeatureCollection', features: orrFeats } });
+    map.addLayer({ id: 'orr-glow', type: 'line', source: 'orr', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ec3013', 'line-width': 15, 'line-blur': 7, 'line-opacity': 0, 'line-opacity-transition': { duration: 500 } } });
+    map.addLayer({ id: 'orr-casing', type: 'line', source: 'orr', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#F7F6F3', 'line-width': 9, 'line-opacity': 0, 'line-opacity-transition': { duration: 500 } } });
+    map.addLayer({ id: 'orr-line', type: 'line', source: 'orr', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ec3013', 'line-width': 4.5, 'line-dasharray': [2, 2], 'line-opacity': 0, 'line-opacity-transition': { duration: 500 } } });
+    map.addLayer({ id: 'orr-labels', type: 'symbol', source: 'orr', layout: { 'visibility': 'none', 'symbol-placement': 'line', 'text-field': 'ORR (Outer Ring Road)', 'text-font': ['Noto Sans Regular'], 'text-size': 12.5, 'text-letter-spacing': 0.04, 'symbol-spacing': 420 }, paint: { 'text-color': '#8E1F12', 'text-halo-color': '#F7F6F3', 'text-halo-width': 2.4 } });
+
+    // forest cover (history, pre-1900)
+    const fc = document.createElement('canvas'); fc.width = 64; fc.height = 64;
+    const fx = fc.getContext('2d');
+    const canopy = (x, y, r) => {
+      fx.fillStyle = 'rgba(24,38,16,.3)'; fx.beginPath(); fx.ellipse(x + r * 0.25, y + r * 0.55, r * 0.95, r * 0.5, 0, 0, 6.3); fx.fill();
+      const g = fx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.15, x, y, r * 1.05);
+      g.addColorStop(0, '#8fa957'); g.addColorStop(0.55, '#5f7a39'); g.addColorStop(1, '#3c5324');
+      fx.fillStyle = g; fx.beginPath(); fx.arc(x, y, r, 0, 6.3); fx.fill();
+      fx.fillStyle = 'rgba(163,192,104,.55)'; fx.beginPath(); fx.arc(x - r * 0.32, y - r * 0.34, r * 0.42, 0, 6.3); fx.fill();
+      fx.fillStyle = 'rgba(52,72,30,.5)'; fx.beginPath(); fx.arc(x + r * 0.4, y + r * 0.32, r * 0.45, 0, 6.3); fx.fill();
+    };
+    canopy(16, 18, 10); canopy(44, 26, 12); canopy(28, 47, 9); canopy(53, 50, 8); canopy(8, 45, 8); canopy(38, 8, 7);
+    map.addImage('forest', { width: 64, height: 64, data: fx.getImageData(0, 0, 64, 64).data });
+    map.addSource('forest-region', { type: 'geojson', data: this.stageGeoData.taluk || boundary });
+    map.addLayer({ id: 'forest-base', type: 'fill', source: 'forest-region', paint: { 'fill-color': '#6f8149', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 1200 } } }, 'roads-glow');
+    map.addLayer({ id: 'forest-fill', type: 'fill', source: 'forest-region', paint: { 'fill-pattern': 'forest', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 1200 } } }, 'roads-glow');
+
+    // contours (ch5) — hypsometric depth gradient by ELEV
+    if (contours) {
+      const elevColor = ['interpolate', ['linear'], ['coalesce', ['get', 'ELEV'], 40], 40, '#6f9a5a', 80, '#93b06a', 120, '#c8c079', 160, '#dab269', 200, '#c88a4e', 240, '#a5623a', 290, '#7d4428'];
+      this.contoursFC = contours;
+      // filled hypsometric base: lowest band fills the whole boundary so no white gaps show between lines
+      map.addLayer({ id: 'topo-base', type: 'fill', source: 'boundary', layout: { 'visibility': 'none' }, paint: { 'fill-color': '#6f9a5a', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 1200 } } }, 'roads-glow');
+      map.addSource('contours', { type: 'geojson', data: contours });
+      // wide, heavily-blurred strokes stacked low→high paint a smooth colour wash between the contour lines
+      map.addLayer({ id: 'contours-fill', type: 'line', source: 'contours', layout: { 'visibility': 'none', 'line-cap': 'round', 'line-join': 'round', 'line-sort-key': ['coalesce', ['get', 'ELEV'], 40] }, paint: { 'line-color': elevColor, 'line-width': 46, 'line-blur': 30, 'line-opacity': 0, 'line-opacity-transition': { duration: 1200 } } }, 'boundary-line');
+      map.addLayer({ id: 'contours-thin', type: 'line', source: 'contours', filter: ['!=', ['get', '10NS'], 1], layout: { 'visibility': 'none', 'line-cap': 'round' }, paint: { 'line-color': 'rgba(58,40,24,0.4)', 'line-width': 0.8, 'line-opacity': 0, 'line-opacity-transition': { duration: 1200 } } });
+      map.addLayer({ id: 'contours-index', type: 'line', source: 'contours', filter: ['==', ['get', '10NS'], 1], layout: { 'visibility': 'none', 'line-cap': 'round' }, paint: { 'line-color': '#4a3320', 'line-width': 1.6, 'line-opacity': 0, 'line-opacity-transition': { duration: 1200 } } });
+      map.addLayer({ id: 'contours-labels', type: 'symbol', source: 'contours', filter: ['>', ['coalesce', ['get', 'LABEL'], 0], 0], layout: { 'visibility': 'none', 'symbol-placement': 'line', 'text-field': ['concat', ['to-string', ['get', 'LABEL']], ' m'], 'text-font': ['Noto Sans Regular'], 'text-size': 12, 'text-letter-spacing': 0.02, 'symbol-spacing': 210, 'text-max-angle': 32, 'text-padding': 2 }, paint: { 'text-color': '#2b1d10', 'text-halo-color': '#f4efe6', 'text-halo-width': 2.2, 'text-halo-blur': 0.3, 'text-opacity': 0, 'text-opacity-transition': { duration: 1200 } } });
+    }
+
+    // ---- water: rivers, streams & canals (persistent across every chapter) ----
+    const [wRiver, wStreams, wCanal] = await Promise.all(['water_river', 'water_streams', 'water_canal'].map((f) => this.loadJSON('data/' + f + '.geojson').catch(() => null)));
+    const wf = (g, kind) => (g && g.features ? g.features.map((ft) => ({ ...ft, properties: { ...ft.properties, _wkind: kind } })) : []);
+    this.waterFC = { type: 'FeatureCollection', features: [...wf(wRiver, 'river'), ...wf(wStreams, 'stream'), ...wf(wCanal, 'canal')] };
+    this.riverFC = wRiver;
+    const zW = (a, b, c) => ['interpolate', ['linear'], ['zoom'], 9, a, 13, b, 16, c];
+    map.addSource('water', { type: 'geojson', data: this.waterFC, generateId: true });
+    map.addLayer({ id: 'water-glow', type: 'line', source: 'water', filter: ['==', ['get', '_wkind'], 'river'], layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#3f9fd6', 'line-width': zW(4, 9, 15), 'line-blur': 6, 'line-opacity': 0, 'line-opacity-transition': { duration: 700 } } }, 'roads-glow');
+    map.addLayer({ id: 'water-streams', type: 'line', source: 'water', filter: ['==', ['get', '_wkind'], 'stream'], layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#5aa0d8', 'line-width': zW(0.6, 1.3, 2.4), 'line-opacity': 0, 'line-opacity-transition': { duration: 700 } } }, 'roads-glow');
+    map.addLayer({ id: 'water-canal', type: 'line', source: 'water', filter: ['==', ['get', '_wkind'], 'canal'], layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#2f86bd', 'line-width': zW(1, 2, 3.2), 'line-dasharray': [3, 2], 'line-opacity': 0, 'line-opacity-transition': { duration: 700 } } }, 'roads-glow');
+    map.addLayer({ id: 'water-river', type: 'line', source: 'water', filter: ['==', ['get', '_wkind'], 'river'], layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#1c6fb0', 'line-width': zW(1.6, 3.4, 5.6), 'line-opacity': 0, 'line-opacity-transition': { duration: 700 } } }, 'roads-glow');
+    map.addLayer({ id: 'water-labels', type: 'symbol', source: 'water', filter: ['==', ['get', '_wkind'], 'river'], layout: { 'symbol-placement': 'line', 'text-field': ['coalesce', ['get', 'name'], 'River'], 'text-font': ['Noto Sans Regular'], 'text-size': 12.5, 'text-letter-spacing': 0.03, 'symbol-spacing': 380, 'text-max-angle': 34 }, paint: { 'text-color': '#155a92', 'text-halo-color': '#F7F6F3', 'text-halo-width': 2.2, 'text-opacity': 0, 'text-opacity-transition': { duration: 700 } } });
+
+    // primary-road name labels
+    map.addLayer({ id: 'road-labels', type: 'symbol', source: 'roads', filter: ['in', ['get', '_class'], ['literal', ['nh', 'sh', 'mdr']]], layout: { 'visibility': 'none', 'symbol-placement': 'line', 'text-field': ['coalesce', ['get', 'name'], ['get', 'ref']], 'text-font': ['Noto Sans Regular'], 'text-size': 11.5, 'text-letter-spacing': 0.02, 'symbol-spacing': 320, 'text-max-angle': 30 }, paint: { 'text-color': '#201e1d', 'text-halo-color': '#F7F6F3', 'text-halo-width': 1.8, 'text-halo-blur': 0.4 } });
+
+    // context blink highlight
+    map.addSource('stage-hi', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    map.addLayer({ id: 'stage-hi-fill', type: 'fill', source: 'stage-hi', paint: { 'fill-color': '#8E1F12', 'fill-opacity': 0 } });
+    map.addLayer({ id: 'stage-hi-line', type: 'line', source: 'stage-hi', layout: { 'line-join': 'round' }, paint: { 'line-color': '#8E1F12', 'line-width': 2.4, 'line-opacity': 0 } });
+
+    // reach rings (ch3)
+    const rings = { type: 'FeatureCollection', features: [7.5, 5, 2.5].map((km, i) => ({ type: 'Feature', properties: { min: [15, 10, 5][i], km }, geometry: { type: 'Polygon', coordinates: [this.circlePoly(this.SITE, km)] } })) };
+    map.addSource('rings', { type: 'geojson', data: rings });
+    map.addLayer({ id: 'rings-fill', type: 'fill', source: 'rings', paint: { 'fill-color': '#C05B1D', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 1000 } } }, 'roads-glow');
+    map.addLayer({ id: 'rings-line', type: 'line', source: 'rings', paint: { 'line-color': '#C05B1D', 'line-width': 1.6, 'line-dasharray': [2, 2], 'line-opacity': 0, 'line-opacity-transition': { duration: 1000 } } });
+
+    // Airport reach radius (ch3) — blue filled circle, no connector lines
+    this.tvmKm = 22;
+    map.addSource('tvm-radius', { type: 'geojson', data: { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [this.circlePoly(this.SITE, this.tvmKm)] } } });
+    map.addLayer({ id: 'tvm-radius-fill', type: 'fill', source: 'tvm-radius', paint: { 'fill-color': '#4A6B8A', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 1000 } } }, 'roads-glow');
+    map.addLayer({ id: 'tvm-radius-line', type: 'line', source: 'tvm-radius', paint: { 'line-color': '#4A6B8A', 'line-width': 2, 'line-dasharray': [4, 3], 'line-opacity': 0, 'line-opacity-transition': { duration: 1000 } } });
+
+    // selected road route (ch3, ch4 on demand)
+    map.addSource('sel-route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    map.addLayer({ id: 'sel-route-glow', type: 'line', source: 'sel-route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff5a2c', 'line-width': 14, 'line-blur': 6, 'line-opacity': 0, 'line-opacity-transition': { duration: 500 } } });
+    map.addLayer({ id: 'sel-route-casing', type: 'line', source: 'sel-route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#F7F6F3', 'line-width': 8.5, 'line-opacity': 0, 'line-opacity-transition': { duration: 500 } } });
+    map.addLayer({ id: 'sel-route-line', type: 'line', source: 'sel-route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff5a2c', 'line-width': 5, 'line-dasharray': [2, 2], 'line-opacity': 0, 'line-opacity-transition': { duration: 500 } } });
+
+    // trade flows (ch2) — from real route geometry where available
+    const capital = this.routeGeo.chalai || this.routeGeo.palayam;
+    const flowFeats = [];
+    if (this.routeGeo.ponmudi) flowFeats.push({ type: 'Feature', properties: { name: 'Hill route — Vithura / Ponmudi' }, geometry: { type: 'LineString', coordinates: this.routeGeo.ponmudi } });
+    if (this.routeGeo.thenkasi) flowFeats.push({ type: 'Feature', properties: { name: 'Ghats route — Thenmala / Tenkasi' }, geometry: { type: 'LineString', coordinates: this.routeGeo.thenkasi } });
+    if (capital) flowFeats.push({ type: 'Feature', properties: { name: 'To the capital — Thiruvananthapuram' }, geometry: { type: 'LineString', coordinates: capital } });
+    map.addSource('flows', { type: 'geojson', data: { type: 'FeatureCollection', features: flowFeats } });
+    map.addLayer({ id: 'flows-line', type: 'line', source: 'flows', layout: { 'line-cap': 'round' }, paint: { 'line-color': '#8E1F12', 'line-width': 3, 'line-dasharray': [0, 4, 3], 'line-opacity': 0, 'line-opacity-transition': { duration: 900 } } });
+
+    // points
+    const junctions = this.datasets.junctions.fc;
+    const bus = this.datasets.busstops.fc;
+    const stands = { type: 'FeatureCollection', features: bus.features.filter((f) => f.properties.public_transport === 'station') };
+    const stops = { type: 'FeatureCollection', features: bus.features.filter((f) => f.properties.public_transport !== 'station') };
+    counts.junctions = junctions.features.length; counts.stand = stands.features.length; counts.stops = stops.features.length;
+    map.addSource('junctions', { type: 'geojson', data: junctions });
+    map.addSource('stands', { type: 'geojson', data: stands });
+    map.addSource('stops', { type: 'geojson', data: stops });
+    map.addLayer({ id: 'stops-dots', type: 'circle', source: 'stops', paint: { 'circle-radius': 3.5, 'circle-color': '#4A6B8A', 'circle-stroke-color': '#F7F6F3', 'circle-stroke-width': 1.2, 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
+    map.addLayer({ id: 'stand-dots', type: 'circle', source: 'stands', paint: { 'circle-radius': 7, 'circle-color': '#5B6B3C', 'circle-stroke-color': '#201e1d', 'circle-stroke-width': 2, 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
+    map.addLayer({ id: 'junction-dots', type: 'circle', source: 'junctions', paint: { 'circle-radius': 5, 'circle-color': '#ec3013', 'circle-stroke-color': '#F7F6F3', 'circle-stroke-width': 1.5, 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
+
+    // markets (ch3, curated local, inside radius)
+    map.addSource('markets', { type: 'geojson', data: { type: 'FeatureCollection', features: this.MARKETS.map((m) => ({ type: 'Feature', properties: { name: m.name, about: m.about || '' }, geometry: { type: 'Point', coordinates: m.c } })) } });
+    map.addLayer({ id: 'markets-dots', type: 'circle', source: 'markets', paint: { 'circle-radius': 5.5, 'circle-color': '#C29A2B', 'circle-stroke-color': '#201e1d', 'circle-stroke-width': 1.6, 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
+
+    // road destinations (ch3) — dots + labels at each endpoint
+    this.DESTS.forEach((d) => { const g = this.routeGeo[d.id]; d.c = g ? this.destOf(g) : this.SITE; });
+    map.addSource('dests', { type: 'geojson', data: { type: 'FeatureCollection', features: this.DESTS.map((d) => ({ type: 'Feature', properties: { id: d.id, name: d.name, color: this.DEST_COLOR[d.cat] }, geometry: { type: 'Point', coordinates: d.c } })) } });
+    map.addLayer({ id: 'dests-dots', type: 'circle', source: 'dests', paint: { 'circle-radius': 6, 'circle-color': ['get', 'color'], 'circle-stroke-color': '#F7F6F3', 'circle-stroke-width': 1.8, 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-opacity-transition': { duration: 800 }, 'circle-stroke-opacity-transition': { duration: 800 } } });
+    map.addLayer({ id: 'dests-labels', type: 'symbol', source: 'dests', layout: { 'visibility': 'none', 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Regular'], 'text-size': 11, 'text-anchor': 'left', 'text-offset': [0.8, 0], 'text-max-width': 9 }, paint: { 'text-color': '#201e1d', 'text-halo-color': '#F7F6F3', 'text-halo-width': 1.6 } });
+
+    // bus corridors (ch4)
+    map.addSource('routes', { type: 'geojson', data: { type: 'FeatureCollection', features: this.ROUTES.map((r) => ({ type: 'Feature', properties: { id: r.id, color: r.color, name: r.name }, geometry: { type: 'LineString', coordinates: r.coords } })) } });
+    map.addLayer({ id: 'routes-casing', type: 'line', source: 'routes', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#F7F6F3', 'line-width': 7, 'line-opacity': 0, 'line-opacity-transition': { duration: 900 } } });
+    map.addLayer({ id: 'routes-line', type: 'line', source: 'routes', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': ['get', 'color'], 'line-width': ['case', ['boolean', ['feature-state', 'sel'], false], 6, 3.6], 'line-opacity': 0, 'line-opacity-transition': { duration: 900 } } });
+
+    // Nedumangad market (chantha) growth border — ch2
+    if (chantha) {
+      map.addSource('chantha', { type: 'geojson', data: chantha });
+      map.addLayer({ id: 'chantha-fill', type: 'fill', source: 'chantha', paint: { 'fill-color': '#8E1F12', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 900 } } });
+      map.addLayer({ id: 'chantha-line', type: 'line', source: 'chantha', paint: { 'line-color': '#8E1F12', 'line-width': 2.4, 'line-opacity': 0, 'line-opacity-transition': { duration: 900 } } });
+    }
+
+    // wards (optional)
+    if (this.datasets.wards && this.datasets.wards.fc.features.length) {
+      this.hasWards = true;
+      counts.wards = this.datasets.wards.fc.features.length;
+      map.addSource('wards', { type: 'geojson', data: this.datasets.wards.fc, generateId: true });
+      map.addLayer({ id: 'wards-topo-fill', type: 'fill', source: 'wards', paint: { 'fill-color': '#5B6B3C', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 900 } } }, 'roads-glow');
+      map.addLayer({ id: 'wards-topo-line', type: 'line', source: 'wards', paint: { 'line-color': '#3f4a2c', 'line-width': 1, 'line-opacity': 0, 'line-opacity-transition': { duration: 900 } } }, 'roads-glow');
+      map.addLayer({ id: 'wards-fill', type: 'fill', source: 'wards', paint: { 'fill-color': '#201e1d', 'fill-opacity': ['case', ['boolean', ['feature-state', 'sel'], false], 0.14, 0], 'fill-opacity-transition': { duration: 300 } } }, 'roads-glow');
+      map.addLayer({ id: 'wards-line', type: 'line', source: 'wards', paint: { 'line-color': '#201e1d', 'line-width': 1, 'line-dasharray': [3, 2], 'line-opacity': 0, 'line-opacity-transition': { duration: 900 } } }, 'roads-glow');
+    }
+
+    // tourist markers — drop pins
+    this.touristMarkers = this.TOURIST.map((t) => {
+      const el = this.pinEl(t.name, '#5B6B3C', false);
+      el.style.display = 'none';
+      el.addEventListener('click', (ev) => { ev.stopPropagation(); this.pickTourist(t); });
+      const m = new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(t.c).addTo(map);
+      m._show = () => { el.style.display = 'flex'; }; m._hide = () => { el.style.display = 'none'; };
+      return m;
+    });
+
+    // pulse highlight
+    const pel = document.createElement('div'); pel.className = 'atlas-pulse'; pel.style.display = 'none'; pel.innerHTML = '<i></i><i></i>';
+    this.pulseEl = pel;
+    this.pulse = new maplibregl.Marker({ element: pel, anchor: 'center' }).setLngLat(this.SITE).addTo(map);
+
+    this.markers = {
+      palace: this.mkMarker([77.002896, 8.609251], 'Koyikkal Palace (c. 1677)', 'hist'),
+      market: this.mkMarker([77.0028, 8.6033], 'Nedumangad Chantha — Public Market', 'hist'),
+      site: this.mkMarker(this.SITE, 'Town core (origin)', ''),
+      tvmLabel: this.mkMarker([this.SITE[0], this.SITE[1] - this.tvmKm / 110.57], 'Trivandrum Airport ≈ ' + Math.round(this.tvmKm) + ' km', 'ring'),
+    };
+    this.markers.palace.getElement().style.cursor = 'pointer';
+    this.markers.market.getElement().style.cursor = 'pointer';
+    this.markers.palace.getElement().addEventListener('click', (ev) => { ev.stopPropagation(); if (this._selKey === 'hist:palace') { this.closeSelection(); return; } this._selKey = 'hist:palace'; this.showImgPopup([77.002896, 8.609251], 'assets/img/hist_palace.png', 'Koyikkal Palace', 'c. 1677 · interpretive reconstruction'); this.pulseAt([77.002896, 8.609251], '#8E1F12'); });
+    this.markers.market.getElement().addEventListener('click', (ev) => { ev.stopPropagation(); if (this._selKey === 'hist:market') { this.closeSelection(); return; } this._selKey = 'hist:market'; this.showImgPopup([77.0028, 8.6033], 'assets/img/hist_market.jpeg', 'Nedumangad Chantha', 'The public market in full trade'); this.pulseAt([77.0028, 8.6033], '#8E1F12'); });
+
+    setTimeout(() => { if (!this._dead) { map.setPaintProperty('boundary-line', 'line-opacity', 0.95); map.setPaintProperty('boundary-fill', 'fill-opacity', 0.35); } }, 400);
+    // roads stay hidden on the landing/context — they appear only from Chapter 01 onward
+    ['roads-line', 'flows-line', 'routes-line', 'routes-casing', 'sel-route-line', 'sel-route-casing', 'road-labels', 'junction-dots', 'stand-dots', 'stops-dots', 'markets-dots', 'dests-dots', 'dests-labels'].forEach((l) => { if (map.getLayer(l)) map.moveLayer(l); });
+
+    this.setState({ mapStatus: '', counts, mapReady: true });
+    this.bindEvents();
+    this.map.on('move', () => this.updateMapTools());
+    this.startDrift();
+    map.fitBounds(this.BOUNDS, { padding: { top: 150, bottom: 130, left: 640, right: 90 }, pitch: 48, bearing: -12, duration: 5000 });
+  }
+
+  pinEl(label, color, hist) {
+    const el = document.createElement('div');
+    el.className = 'atlas-pin' + (hist ? ' hist' : '');
+    const inner = document.createElement('div'); inner.className = 'atlas-pin-inner';
+    const chip = document.createElement('span'); chip.className = 'lbl'; chip.style.background = color; chip.textContent = label;
+    const head = document.createElement('div'); head.className = 'head';
+    head.innerHTML = '<svg width="24" height="32" viewBox="0 0 24 32" style="display:block"><path d="M12 1C6 1 1.4 5.6 1.4 11.6 1.4 19.6 12 31 12 31s10.6-11.4 10.6-19.4C22.6 5.6 18 1 12 1z" fill="' + color + '" stroke="#F7F6F3" stroke-width="2"/><circle cx="12" cy="11.5" r="4" fill="#F7F6F3"/></svg>';
+    inner.appendChild(chip); inner.appendChild(head); el.appendChild(inner);
+    return el;
+  }
+  mkMarker(lngLat, text, cls) {
+    if (cls === 'ring') { const el = document.createElement('div'); el.className = 'atlas-poi'; el.textContent = text; el.style.display = 'none'; return new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(lngLat).addTo(this.map); }
+    const el = this.pinEl(text, cls === 'hist' ? '#8E1F12' : '#201e1d', cls === 'hist');
+    el.style.display = 'none';
+    return new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(lngLat).addTo(this.map);
+  }
+  showMarkers(keys) { Object.entries(this.markers || {}).forEach(([k, m]) => { m.getElement().style.display = keys.includes(k) ? '' : 'none'; }); }
+  pulseAt(c, color) { if (!this.pulseEl) return; this.pulseEl.style.setProperty('--pc', color); this.pulse.setLngLat(c); this.pulseEl.style.display = 'block'; }
+  clearPulse() { if (this.pulseEl) this.pulseEl.style.display = 'none'; }
+  showImgPopup(coord, img, title, meta) {
+    if (!this.imgPopEl) {
+      const el = document.createElement('div'); el.className = 'atlas-imgpop';
+      el.style.pointerEvents = 'auto'; el.style.cursor = 'pointer';
+      el.addEventListener('click', (ev) => { ev.stopPropagation(); this.closeSelection(); });
+      this.imgPopEl = el;
+      this.imgPop = new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, -14] }).setLngLat(coord).addTo(this.map);
+    }
+    this.imgPopEl.innerHTML = '<div class="atlas-imgpop-card"><div class="grayscale" style="width:100%;height:132px;background:#201e1d"><img src="' + img + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block"/></div><div class="cap"><b>' + title + '</b><span>' + (meta || '') + '</span></div></div>';
+    this.imgPop.setLngLat(coord);
+    this.imgPopEl.style.display = 'block';
+    const card = this.imgPopEl.firstChild; card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
+  }
+  hideImgPopup() { if (this.imgPopEl) this.imgPopEl.style.display = 'none'; }
+  closeSelection() {
+    this._selKey = null;
+    this.clearPulse(); this.clearSelRoute(); this.hideImgPopup();
+    const m = this.map;
+    if (m.getSource('routes')) this.ROUTES.forEach((_, i) => m.setFeatureState({ source: 'routes', id: i }, { sel: false }));
+    if (this.hasWards && m.getSource('wards')) this.datasets.wards.fc.features.forEach((_, i) => m.setFeatureState({ source: 'wards', id: i }, { sel: false }));
+    this.setState({ detail: null, tourist: null, dest: null, route: null });
+  }
+  clearSelRoute() { const m = this.map; if (m && m.getSource('sel-route')) { m.getSource('sel-route').setData({ type: 'FeatureCollection', features: [] }); ['sel-route-line', 'sel-route-casing', 'sel-route-glow'].forEach((l) => { if (m.getLayer(l)) m.setPaintProperty(l, 'line-opacity', 0); }); } this.stopDash(); }
+  drawSelRoute(geom, color) {
+    const m = this.map;
+    ['sel-route-glow', 'sel-route-casing', 'sel-route-line'].forEach((l) => m.moveLayer(l));
+    // keep point layers above the highlight so junctions / bus stops never hide behind it
+    ['stops-dots', 'stand-dots', 'markets-dots', 'dests-dots', 'junction-dots'].forEach((l) => { if (m.getLayer(l)) m.moveLayer(l); });
+    m.getSource('sel-route').setData({ type: 'Feature', properties: {}, geometry: geom });
+    m.setPaintProperty('sel-route-glow', 'line-color', color); m.setPaintProperty('sel-route-line', 'line-color', color);
+    m.setPaintProperty('sel-route-glow', 'line-opacity', 0.5);
+    m.setPaintProperty('sel-route-casing', 'line-opacity', 0.9);
+    m.setPaintProperty('sel-route-line', 'line-opacity', 1);
+    this.startDash('sel-route-line');
+  }
+
+  bindEvents() {
+    const map = this.map;
+    let hoverId = null;
+    map.on('mousemove', 'roads-line', (e) => {
+      if (!this.inChapterScene() || this.state.scene === 'ch5' || !e.features.length) return;
+      map.getCanvas().style.cursor = 'pointer';
+      if (hoverId !== null) map.setFeatureState({ source: 'roads', id: hoverId }, { hover: false });
+      hoverId = e.features[0].id; map.setFeatureState({ source: 'roads', id: hoverId }, { hover: true });
+    });
+    map.on('mouseleave', 'roads-line', () => { map.getCanvas().style.cursor = ''; if (hoverId !== null) map.setFeatureState({ source: 'roads', id: hoverId }, { hover: false }); hoverId = null; });
+    const cursorOn = (l) => { map.on('mouseenter', l, () => { if (this.inChapterScene()) map.getCanvas().style.cursor = 'pointer'; }); map.on('mouseleave', l, () => { map.getCanvas().style.cursor = ''; }); };
+    ['junction-dots', 'stand-dots', 'stops-dots', 'markets-dots', 'dests-dots', 'wards-fill'].forEach((l) => { if (map.getLayer(l)) cursorOn(l); });
+
+    map.on('click', (e) => {
+      if (!this.inChapterScene()) return;
+      const hasSel = !!(this._selKey || this.state.detail || this.state.tourist || this.state.dest || this.state.route);
+      // water is clickable in every chapter — check it first
+      if (this.state.layers.water) {
+        const wl = ['water-river', 'water-canal', 'water-streams'].filter((l) => map.getLayer(l));
+        const wfs = map.queryRenderedFeatures(e.point, { layers: wl });
+        if (wfs.length) { this.openWater(wfs[0]); return; }
+      }
+      if (this.state.scene === 'ch2') { if (hasSel) this.closeSelection(); return; }
+      if (this.state.scene === 'ch5') {
+        const l5 = [];
+        if (this.state.layers.contourRoads && map.getLayer('roads-line')) l5.push('roads-line');
+        if (this.hasWards) l5.push('wards-fill');
+        const fs = map.queryRenderedFeatures(e.point, { layers: l5 });
+        if (!fs.length) { if (hasSel) this.closeSelection(); return; }
+        if (fs[0].layer.id === 'roads-line') this.openRoad(fs[0].properties, fs[0].geometry);
+        else this.openWardTopo(fs[0]);
+        return;
+      }
+      const layers = ['junction-dots', 'stand-dots', 'stops-dots'];
+      if (this.state.scene === 'ch4') layers.push('routes-line', 'wards-fill');
+      if (this.state.scene === 'ch3') layers.push('dests-dots', 'markets-dots');
+      layers.push('roads-line');
+      const feats = map.queryRenderedFeatures(e.point, { layers: layers.filter((l) => map.getLayer(l)) });
+      if (!feats.length) { if (hasSel) this.closeSelection(); return; }
+      const f = feats[0], p = f.properties;
+      if (f.layer.id === 'junction-dots') this.openJunction(p, f.geometry.coordinates);
+      else if (f.layer.id === 'stand-dots' || f.layer.id === 'stops-dots') this.openBus(p, f.layer.id === 'stand-dots', f.geometry.coordinates);
+      else if (f.layer.id === 'dests-dots') this.openDest(p.id);
+      else if (f.layer.id === 'markets-dots') this.openMarket(p, f.geometry.coordinates);
+      else if (f.layer.id === 'routes-line') this.pickRoute(p.id);
+      else if (f.layer.id === 'wards-fill') this.openWard(f);
+      else this.openRoad(p, f.geometry);
+    });
+  }
+  inChapterScene() { return !!this.CHAPTERS[this.state.scene]; }
+
+  wardName(p) { const n = p.Ward_Name || p.name || p.ward_name || p.WARD_NAME || p.NAME || p.Name; const no = p.Ward_No ?? p.ward_no ?? p.WARD_NO; if (n && no != null) return 'Ward ' + no + ' · ' + n; if (n) return n; if (no != null) return 'Ward ' + no; return null; }
+  pointInPoly(pt, poly) { let inside = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if ((yi > pt[1]) !== (yj > pt[1]) && pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi) inside = !inside; } return inside; }
+  wardRings(f) { const g = f.geometry; return g.type === 'MultiPolygon' ? g.coordinates.map((p) => p[0]) : [g.coordinates[0]]; }
+  wardCentroid(f) { const r = this.wardRings(f)[0]; let x = 0, y = 0; r.forEach((c) => { x += c[0]; y += c[1]; }); return [x / r.length, y / r.length]; }
+  lineCoords(geom) { if (!geom) return []; if (geom.type === 'LineString') return geom.coordinates; if (geom.type === 'MultiLineString') return geom.coordinates.flat(); if (geom.type === 'Point') return [geom.coordinates]; return []; }
+  wardsForCoords(coords) { if (!this.hasWards) return null; const names = []; this.datasets.wards.fc.features.forEach((f) => { const rings = this.wardRings(f); if (coords.some((c) => rings.some((r) => this.pointInPoly(c, r)))) { const n = this.wardName(f.properties); if (n && !names.includes(n)) names.push(n); } }); return names.length ? names.join(' · ') : null; }
+
+  bearing(a, b) { const y = Math.sin((b[0] - a[0]) * Math.PI / 180) * Math.cos(b[1] * Math.PI / 180); const x = Math.cos(a[1] * Math.PI / 180) * Math.sin(b[1] * Math.PI / 180) - Math.sin(a[1] * Math.PI / 180) * Math.cos(b[1] * Math.PI / 180) * Math.cos((b[0] - a[0]) * Math.PI / 180); return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; }
+  compass(deg) { return ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(deg / 45) % 8]; }
+  widthText(p, klass) { if (p.width) return p.width + ' m'; if (p.lanes) return '≈ ' + (p.lanes * 3.5).toFixed(1) + ' m (' + p.lanes + ' lanes)'; return { nh: '≈ 14 m (2×2 lanes)', sh: '7 – 10 m', mdr: '5 – 7 m', municipal: '3.5 – 5 m', local: '3 – 3.5 m' }[klass] || '—'; }
+  openRoad(p, geom) {
+    const coords = this.lineCoords(geom);
+    const rkey = 'road:' + (p.name || p.ref || '') + ':' + (coords[0] ? coords[0].join(',') : '') + ':' + (coords.length);
+    if (this._selKey === rkey) { this.closeSelection(); return; }
+    this._selKey = rkey;
+    const cls = this.CLASSES[p._class] || ['Road', '#4B4845'];
+    const rows = this.detailRowsFromProps(p, (add) => {
+      add('Ref', p.ref); add('Classification', p.highway); add('Max speed', p.maxspeed, ' km/h');
+      add('Width', p.width, ' m'); add('Lanes', p.lanes); add('Surface', p.surface);
+      add('One-way', p.oneway === 'yes' ? 'Yes' : null); add('Bridge', p.bridge === 'yes' ? 'Yes' : null); add('Connects to', p.destination);
+      if (this.hasWards) add('Wards along', this.wardsForCoords(coords) || 'Outside mapped wards');
+    });
+    let anim = null;
+    if (coords.length > 1) {
+      const a = coords[0], b = coords[coords.length - 1];
+      const brg = this.bearing(a, b);
+      anim = { color: cls[1], klass: cls[0], name: p.name || p.ref || 'Unnamed road', width: this.widthText(p, p._class), fromDir: this.compass((brg + 180) % 360), toDir: this.compass(brg), ref: p.ref || '' };
+    }
+    this.setState({ detail: { kind: 'road', kicker: cls[0], accent: cls[1], title: p.name || p.ref || 'Unnamed road', rows: rows.slice(0, 8), anim } });
+    // highlight the full selected segment with a running dash
+    this.drawSelRoute(geom, '#e5231b');
+    if (coords.length) this.pulseAt(coords[Math.floor(coords.length / 2)], cls[1]);
+  }
+  openJunction(p, coords) {
+    const jkey = 'jn:' + coords.join(',');
+    if (this._selKey === jkey) { this.closeSelection(); return; }
+    this._selKey = jkey;
+    const note = (this.junctionNotes || {})[p.osm_id] || {};
+    const rows = this.detailRowsFromProps(p, (add) => { add('Leads to / from', note.leads); add('Importance', note.importance); add('Control', note.control); add('Nearest bus', note.bus); if (this.hasWards) add('Ward', this.wardsForCoords([coords]) || 'Outside mapped wards'); });
+    this.setState({ detail: { kicker: 'Junction', accent: '#ec3013', title: p.name || 'Unnamed junction', sub: p['name:ml'] && p['name:ml'] !== p.name ? p['name:ml'] : '', rows } });
+    this.pulseAt(coords, '#ec3013'); this.map.easeTo({ center: coords, duration: 900, offset: [80, -60] });
+  }
+  openBus(p, isStand, coords) {
+    const bkey = 'bus:' + coords.join(',');
+    if (this._selKey === bkey) { this.closeSelection(); return; }
+    this._selKey = bkey;
+    const rows = this.detailRowsFromProps(p, (add) => { add('Type', isStand ? 'Bus stand / station' : 'Bus stop (platform)'); add('Shelter', p.shelter === 'yes' ? 'Yes' : p.shelter === 'no' ? 'No' : null); add('Bench', p.bench === 'yes' ? 'Yes' : null); add('Lit', p.lit === 'yes' ? 'Yes' : null); add('Operator', p.operator); add('Network', p.network); add('Routes', p.route_ref); if (this.hasWards) add('Ward', this.wardsForCoords([coords]) || 'Outside mapped wards'); });
+    this.setState({ detail: { kicker: isStand ? 'Bus stand' : 'Bus stop', accent: isStand ? '#5B6B3C' : '#4A6B8A', title: p.name || (isStand ? 'Nedumangad bus stand' : 'Bus stop'), rows } });
+    this.pulseAt(coords, isStand ? '#5B6B3C' : '#4A6B8A');
+  }
+  openMarket(p, coords) {
+    const mkey = 'mkt:' + coords.join(',');
+    if (this._selKey === mkey) { this.closeSelection(); return; }
+    this._selKey = mkey;
+    const rows = [{ label: 'Type', value: 'Market' }];
+    if (p.about) rows.push({ label: 'Note', value: p.about });
+    rows.push({ label: 'Within reach', value: '≈ ' + Math.round(this.km(this.SITE, coords)) + ' km from the town core' });
+    if (this.hasWards) rows.push({ label: 'Ward', value: this.wardsForCoords([coords]) || 'Outside mapped wards' });
+    this.setState({ detail: { kicker: 'Market', accent: '#C29A2B', title: p.name, rows } });
+    this.pulseAt(coords, '#C29A2B');
+    const geo = this.mRouteGeo && this.mRouteGeo[p.key];
+    if (geo) {
+      this.drawSelRoute({ type: 'LineString', coordinates: geo }, '#C29A2B');
+      let minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+      geo.forEach(([x, y]) => { minx = Math.min(minx, x); maxx = Math.max(maxx, x); miny = Math.min(miny, y); maxy = Math.max(maxy, y); });
+      this.map.fitBounds([[minx, miny], [maxx, maxy]], { padding: { top: 110, bottom: 140, left: 380, right: 80 }, pitch: 20, bearing: 0, duration: 2600, essential: true });
+    }
+  }
+  openDest(id) {
+    if (this.state.dest === id) { this.closeSelection(); return; }
+    const d = this.DESTS.find((x) => x.id === id); if (!d) return;
+    const color = this.DEST_COLOR[d.cat];
+    this.setState({ dest: id, detail: { kicker: 'By road · ' + d.cat, accent: color, img: d.img || null, title: d.name, rows: [
+      { label: 'Distance by road', value: d.km + ' km' }, { label: 'Travel time', value: '≈ ' + d.min + ' min (driving)' },
+      { label: 'About', value: d.about }, { label: 'Straight-line', value: '≈ ' + Math.round(this.km(this.SITE, d.c)) + ' km' },
+    ] } });
+    if (d.img) this.showImgPopup(d.c, d.img, d.name, d.km + ' km · ' + d.min + ' min by road'); else this.hideImgPopup();
+    const geo = this.routeGeo[id];
+    if (geo) {
+      this.drawSelRoute({ type: 'LineString', coordinates: geo }, '#1f7ae0');
+      let minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+      geo.forEach(([x, y]) => { minx = Math.min(minx, x); maxx = Math.max(maxx, x); miny = Math.min(miny, y); maxy = Math.max(maxy, y); });
+      this.map.fitBounds([[minx, miny], [maxx, maxy]], { padding: { top: 110, bottom: 140, left: 380, right: 80 }, pitch: 20, bearing: 0, duration: 2800, essential: true });
+    }
+    this.pulseAt(d.c, color);
+  }
+
+  pickRoute(id) {
+    if (this.state.route === id) { this.closeSelection(); return; }
+    const r = this.ROUTES.find((x) => x.id === id); if (!r) return;
+    this.setState({ route: id });
+    const map = this.map;
+    this.ROUTES.forEach((x, i) => map.setFeatureState({ source: 'routes', id: i }, { sel: x.id === id }));
+    const rows = [{ label: 'Direction', value: r.dir }, { label: 'Via', value: r.via }, { label: this.hasWards ? 'Wards served' : 'Serves', value: this.wardsForCoords(r.coords) || r.serves }, { label: 'Roads affected', value: r.roads }];
+    this.setState({ detail: { kicker: 'Bus corridor — indicative', accent: r.color, title: r.name, rows } });
+    if (r.coords && r.coords.length > 1) this.drawSelRoute({ type: 'LineString', coordinates: r.coords }, r.color);
+    this.pulseAt(r.coords[Math.floor(r.coords.length / 2)], r.color);
+    let minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+    r.coords.forEach(([x, y]) => { minx = Math.min(minx, x); maxx = Math.max(maxx, x); miny = Math.min(miny, y); maxy = Math.max(maxy, y); });
+    map.fitBounds([[minx, miny], [maxx, maxy]], { padding: { top: 120, bottom: 140, left: 380, right: 80 }, pitch: 30, bearing: 0, duration: 2800, essential: true });
+  }
+  openWard(f) {
+    const p = f.properties;
+    if (f.id != null) { this.datasets.wards.fc.features.forEach((_, i) => this.map.setFeatureState({ source: 'wards', id: i }, { sel: false })); this.map.setFeatureState({ source: 'wards', id: f.id }, { sel: true }); }
+    const corridors = this.ROUTES.filter((r) => { const rings = this.wardRings(f); return r.coords.some((c) => rings.some((ring) => this.pointInPoly(c, ring))); });
+    const rows = this.detailRowsFromProps(p, (add) => { add('Ward no.', p.Ward_No ?? p.ward_no ?? p.WARD_NO); add('Local body', p.LSGD); add('Corridors through', corridors.length ? corridors.map((r) => r.name).join(' · ') : 'No mapped corridor — local roads only'); add('Population', p.population ?? p.POPULATION); });
+    this.setState({ detail: { kicker: 'Ward', accent: '#201e1d', title: this.wardName(p) || 'Ward', rows } });
+    this.pulseAt(this.wardCentroid(f), '#201e1d');
+  }
+  repPoint(geom) { if (!geom) return null; if (geom.type === 'LineString') return geom.coordinates[Math.floor(geom.coordinates.length / 2)]; if (geom.type === 'MultiLineString') { const c = geom.coordinates[0]; return c[Math.floor(c.length / 2)]; } return null; }
+  computeWardElev() {
+    if (this.wardElev || !this.contoursFC || !this.hasWards) return;
+    const wards = this.datasets.wards.fc.features;
+    this.wardElev = wards.map(() => ({ min: 1e9, max: -1e9, n: 0 }));
+    const rings = wards.map((w) => this.wardRings(w));
+    this.contoursFC.features.forEach((cf) => {
+      const e = cf.properties.ELEV; if (e == null) return;
+      const pt = this.repPoint(cf.geometry); if (!pt) return;
+      for (let i = 0; i < wards.length; i++) { if (rings[i].some((r) => this.pointInPoly(pt, r))) { const s = this.wardElev[i]; if (e < s.min) s.min = e; if (e > s.max) s.max = e; s.n++; break; } }
+    });
+  }
+  openWardTopo(f) {
+    this.computeWardElev();
+    const idx = f.id;
+    if (idx != null) { this.datasets.wards.fc.features.forEach((_, i) => this.map.setFeatureState({ source: 'wards', id: i }, { sel: false })); this.map.setFeatureState({ source: 'wards', id: f.id }, { sel: true }); }
+    const st = (this.wardElev && idx != null) ? this.wardElev[idx] : null;
+    const rows = [];
+    if (st && st.n) { rows.push({ label: 'Lowest contour', value: st.min + ' m' }); rows.push({ label: 'Highest contour', value: st.max + ' m' }); rows.push({ label: 'Elevation change', value: (st.max - st.min) + ' m relief' }); rows.push({ label: 'Contours crossing', value: String(st.n) + ' lines (20 m)' }); }
+    else rows.push({ label: 'Elevation', value: 'No 20 m contour crosses this ward — near-level ground' });
+    if (f.properties.Ward_No != null) rows.push({ label: 'Ward no.', value: String(f.properties.Ward_No) });
+    this.setState({ detail: { kicker: 'Ward · topography', accent: '#6f4326', title: this.wardName(f.properties) || 'Ward', rows } });
+    this.pulseAt(this.wardCentroid(f), '#6f4326');
+  }
+  pickTourist(t) {
+    if (this.state.tourist === t.key) { this.closeSelection(); return; }
+    this.setState({ tourist: t.key, detail: { kicker: 'Tourist place — location approx.', accent: '#5B6B3C', title: t.name, rows: [{ label: 'Distance', value: t.d }, { label: 'About', value: t.note }, { label: 'Reached via', value: t.via }] } });
+    this.pulseAt(t.c, '#5B6B3C');
+    if (t.img) this.showImgPopup(t.c, t.img, t.name, t.d + ' · ' + t.note);
+    const geo = this.tRouteGeo && this.tRouteGeo[t.key];
+    if (geo) {
+      this.drawSelRoute({ type: 'LineString', coordinates: geo }, '#1f7ae0');
+      let minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+      geo.forEach(([x, y]) => { minx = Math.min(minx, x); maxx = Math.max(maxx, x); miny = Math.min(miny, y); maxy = Math.max(maxy, y); });
+      this.map.fitBounds([[minx, miny], [maxx, maxy]], { padding: { top: 110, bottom: 150, left: 360, right: 340 }, pitch: 20, bearing: 0, duration: 3000, essential: true });
+    } else {
+      this.map.flyTo({ center: t.c, zoom: t.d === 'In town' ? 14 : 11.2, pitch: 40, bearing: 0, duration: 3000, curve: 1.2, essential: true });
+    }
+  }
+
+  goBack() { const s = this.state.scene; if (s === 'context' || s === 'main') this.goHome(); else if (this.CHAPTERS[s]) this.goScene('main'); }
+  goHome() {
+    this.clearIntro();
+    this.setState({ scene: 'landing', detail: null, showFacts: false, tourist: null, dest: null, intro: false });
+    this.resetChapterLayers(); this.setInteractive(false);
+    this.map.fitBounds(this.BOUNDS, { padding: { top: 150, bottom: 130, left: 640, right: 90 }, pitch: 48, bearing: -12, duration: 3500 });
+    this.startDrift();
+  }
+  beginContext() {
+    this.clearIntro(); clearTimeout(this._spinT); this.map.stop(); this.stopStageBlink(); this.resetChapterLayers(); this.setInteractive(false);
+    this.setState({ scene: 'context', stage: 0, intro: true, showFacts: false, detail: null, tourist: null, dest: null, introLabel: 'Earth', introSub: 'A view of the planet' });
+    this.runCinematicIntro();
+  }
+  runCinematicIntro() {
+    const map = this.map; if (!map) return;
+    // begin wide, then ONE continuous eased flight down to the municipality — the camera never stops between locations
+    map.jumpTo({ center: [78.4, 13.5], zoom: 1.55, pitch: 0, bearing: 0 });
+    if (map.getSource('stage-hi')) map.getSource('stage-hi').setData({ type: 'FeatureCollection', features: [] });
+    map.setPaintProperty('stage-hi-line', 'line-opacity-transition', { duration: 340, delay: 0 });
+    map.setPaintProperty('stage-hi-fill', 'fill-opacity-transition', { duration: 340, delay: 0 });
+    map.setPaintProperty('stage-hi-line', 'line-opacity', 0);
+    map.setPaintProperty('stage-hi-fill', 'fill-opacity', 0);
+    const DUR = 5200;
+    const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    requestAnimationFrame(() => { if (this._dead || this.state.scene !== 'context') return; map.easeTo({ center: this.CENTER, zoom: 12.4, pitch: 45, bearing: -8, duration: DUR, easing: easeInOut, essential: true }); });
+    const steps = [
+      { t: 0, name: 'Earth', sub: 'A view of the planet', geo: null },
+      { t: 850, name: 'India', sub: 'The subcontinent', geo: 'india' },
+      { t: 1700, name: 'Kerala', sub: 'Coast & the Western Ghats', geo: 'kerala' },
+      { t: 2550, name: 'Thiruvananthapuram District', sub: 'Southern-most district of Kerala', geo: 'district' },
+      { t: 3400, name: 'Nedumangad Taluk', sub: 'Inland, in the foothills', geo: 'taluk' },
+      { t: 4250, name: 'Nedumangad Municipality', sub: 'The study area', geo: 'municipality' },
+    ];
+    this._introTimers = [];
+    steps.forEach((s, i) => { this._introTimers.push(setTimeout(() => { if (this._dead || this.state.scene !== 'context' || !this.state.intro) return; this.setState({ introLabel: s.name, introSub: s.sub, stage: i }); this.cineBoundary(s.geo); }, s.t)); });
+    // settle the highlight onto the persistent municipal outline, then hand over full interaction
+    this._introTimers.push(setTimeout(() => { if (this._dead || !this.map.getLayer('stage-hi-line')) return; this.map.setPaintProperty('stage-hi-line', 'line-opacity', 0); this.map.setPaintProperty('stage-hi-fill', 'fill-opacity', 0); }, 4950));
+    this._introTimers.push(setTimeout(() => { if (this._dead || this.state.scene !== 'context') return; this.setState({ intro: false, showFacts: true }); this.setInteractive(true); }, DUR + 140));
+  }
+  cineBoundary(geoKey) {
+    const map = this.map; if (!map || !map.getLayer('stage-hi-line')) return;
+    map.setPaintProperty('stage-hi-line', 'line-opacity', 0);
+    map.setPaintProperty('stage-hi-fill', 'fill-opacity', 0);
+    const g = geoKey ? this.stageGeoData[geoKey] : null;
+    map.getSource('stage-hi').setData(g || { type: 'FeatureCollection', features: [] });
+    if (!g) return;
+    requestAnimationFrame(() => { if (this._dead || !map.getLayer('stage-hi-line')) return; map.setPaintProperty('stage-hi-line', 'line-opacity', 0.92); map.setPaintProperty('stage-hi-fill', 'fill-opacity', 0.12); });
+  }
+  clearIntro() {
+    (this._introTimers || []).forEach(clearTimeout); this._introTimers = [];
+    if (this.map && this.map.getLayer('stage-hi-line')) { this.map.setPaintProperty('stage-hi-line', 'line-opacity', 0); this.map.setPaintProperty('stage-hi-fill', 'fill-opacity', 0); }
+  }
+  skipIntro() {
+    this.clearIntro(); clearTimeout(this._spinT); this.map.stop(); this.resetChapterLayers(); this.setInteractive(true);
+    const last = this.STAGES.length - 1;
+    this.setState({ scene: 'context', stage: last, intro: false, showFacts: true, detail: null, tourist: null, dest: null });
+    this.map.setPaintProperty('stage-hi-line', 'line-opacity-transition', { duration: 0 }); this.map.setPaintProperty('stage-hi-fill', 'fill-opacity-transition', { duration: 0 });
+    this.startStageBlink(); this.setStageGeo(last);
+    const st = this.STAGES[last];
+    this.map.flyTo({ center: st.center, zoom: st.zoom, pitch: 0, bearing: 0, duration: 2600, curve: 1.2, essential: true });
+  }
+  setStageGeo(i) { const g = this.stageGeoData[this.STAGES[i].geoKey], src = this.map.getSource('stage-hi'); if (g && src) src.setData(g); }
+  startStageBlink() {
+    this.stopStageBlink(); this._blinkOn = true; const t0 = performance.now();
+    const tick = (ts) => {
+      if (this._dead || !this._blinkOn || !this.map.getLayer('stage-hi-line')) return;
+      const s = Math.max(0, Math.sin((ts - t0) / 360));
+      this.map.setPaintProperty('stage-hi-line', 'line-opacity', 0.25 + 0.7 * s);
+      this.map.setPaintProperty('stage-hi-fill', 'fill-opacity', 0.05 + 0.13 * s);
+      this._blinkRaf = requestAnimationFrame(tick);
+    };
+    this._blinkRaf = requestAnimationFrame(tick);
+  }
+  stopStageBlink() { this._blinkOn = false; cancelAnimationFrame(this._blinkRaf); if (this.map && this.map.getLayer('stage-hi-line')) { this.map.setPaintProperty('stage-hi-line', 'line-opacity', 0); this.map.setPaintProperty('stage-hi-fill', 'fill-opacity', 0); } }
+  runStage(i) {
+    if (this._dead || this.state.scene !== 'context') return;
+    const st = this.STAGES[i];
+    this.setState({ stage: i }); this.setStageGeo(i);
+    this.map.flyTo({ center: st.center, zoom: st.zoom, pitch: 0, bearing: 0, duration: st.dur, curve: 1.25, essential: true });
+    this.map.once('moveend', () => { if (this._dead || this.state.scene !== 'context') return; if (i + 1 < this.STAGES.length) setTimeout(() => this.runStage(i + 1), 1100); else this.setState({ showFacts: true }); });
+  }
+  goScene(sc) {
+    this.clearIntro(); clearTimeout(this._spinT); this.map.stop();
+    this.setState({ scene: sc, detail: null, tourist: null, dest: null, proposedOnly: false, videoMode: false, intro: false });
+    this.resetChapterLayers();
+    const map = this.map;
+    if (sc === 'main') { this.setInteractive(false); map.flyTo({ center: this.CENTER, zoom: 12.1, pitch: 45, bearing: -12, duration: 4000, curve: 1.2, essential: true }); return; }
+    this.setInteractive(true);
+    if (!this._ctrls) { this._ctrls = true; map.addControl(new maplibregl.NavigationControl({ visualizePitch: true, showCompass: false }), 'top-right'); }
+    requestAnimationFrame(() => this.updateMapTools());
+    if (sc !== 'ch5') map.setLayoutProperty('road-labels', 'visibility', 'visible');
+    if (sc === 'ch1' || sc === 'ch3' || sc === 'ch4') map.setPaintProperty('roads-line', 'line-opacity', 0.9);
+    if (sc === 'ch1') { this.applyLayerVisibility(); map.fitBounds(this.BOUNDS, { padding: { top: 110, bottom: 100, left: 380, right: 80 }, pitch: 40, bearing: -10, duration: 3800, essential: true }); }
+    else if (sc === 'ch2') { this.setState({ period: 0 }); this.applyPeriod(0); map.flyTo({ center: [77.008, 8.606], zoom: 13.0, pitch: 35, bearing: -8, duration: 3800, curve: 1.2, essential: true }); }
+    else if (sc === 'ch3') { this.applyLayerVisibility(); map.fitBounds([[76.90, 8.44], [77.10, 8.66]], { padding: { top: 100, bottom: 120, left: 380, right: 70 }, pitch: 20, bearing: 0, duration: 3800, essential: true }); }
+    else if (sc === 'ch4') { this.setState({ route: null }); this.applyLayerVisibility(); map.fitBounds([[76.86, 8.51], [77.16, 8.72]], { padding: { top: 100, bottom: 110, left: 360, right: 60 }, pitch: 25, bearing: 0, duration: 3800, essential: true }); }
+    else if (sc === 'ch5') { this.applyLayerVisibility(); ['boundary-line'].forEach((l) => map.moveLayer(l)); map.fitBounds(this.BOUNDS, { padding: { top: 110, bottom: 90, left: 60, right: 260 }, pitch: 0, bearing: 0, duration: 3800, essential: true }); }
+  }
+
+  ch3Markers() { const out = ['site'], L = this.state.layers; if (L.rings) out.push('ring5', 'ring10', 'ring15'); if (L.tvmRadius) out.push('tvmLabel'); return out; }
+
+  resetChapterLayers() {
+    const map = this.map;
+    if (!map || !map.getLayer('roads-line')) return;
+    this.hideImgPopup();
+    ['junction-dots', 'stand-dots', 'stops-dots', 'markets-dots', 'dests-dots'].forEach((l) => { map.setPaintProperty(l, 'circle-opacity', 0); map.setPaintProperty(l, 'circle-stroke-opacity', 0); });
+    ['rings-fill', 'tvm-radius-fill'].forEach((l) => map.setPaintProperty(l, 'fill-opacity', 0));
+    ['rings-line', 'tvm-radius-line', 'flows-line'].forEach((l) => map.setPaintProperty(l, 'line-opacity', 0));
+    if (map.getLayer('forest-fill')) { map.setPaintProperty('forest-base', 'fill-opacity', 0); map.setPaintProperty('forest-fill', 'fill-opacity', 0); }
+    ['contours-fill', 'contours-thin', 'contours-index'].forEach((l) => { if (map.getLayer(l)) map.setPaintProperty(l, 'line-opacity', 0); });
+    if (map.getLayer('topo-base')) { map.setPaintProperty('topo-base', 'fill-opacity', 0); map.setLayoutProperty('topo-base', 'visibility', 'none'); }
+    ['orr-glow', 'orr-casing', 'orr-line'].forEach((l) => { if (map.getLayer(l)) map.setPaintProperty(l, 'line-opacity', 0); });
+    if (map.getLayer('orr-labels')) map.setLayoutProperty('orr-labels', 'visibility', 'none');
+    if (map.getLayer('wards-topo-line')) { map.setPaintProperty('wards-topo-fill', 'fill-opacity', 0); map.setPaintProperty('wards-topo-line', 'line-opacity', 0); }
+    if (map.getLayer('contours-labels')) map.setPaintProperty('contours-labels', 'text-opacity', 0);
+    if (map.getLayer('routes-line')) { map.setPaintProperty('routes-line', 'line-opacity', 0); map.setPaintProperty('routes-casing', 'line-opacity', 0); }
+    if (map.getLayer('wards-line')) map.setPaintProperty('wards-line', 'line-opacity', 0);
+    ['road-labels', 'dests-labels', 'contours-fill', 'contours-thin', 'contours-index', 'contours-labels'].forEach((l) => { if (map.getLayer(l)) map.setLayoutProperty(l, 'visibility', 'none'); });
+    this.clearSelRoute(); this.stopStageBlink(); this.stopRoadBlink();
+    if (map.getLayer('chantha-fill')) { map.setPaintProperty('chantha-fill', 'fill-opacity', 0); map.setPaintProperty('chantha-line', 'line-opacity', 0); }
+    if (map.getSource('stage-hi')) map.getSource('stage-hi').setData({ type: 'FeatureCollection', features: [] });
+    (this.touristMarkers || []).forEach((m) => m._hide());
+    map.setPaintProperty('roads-line', 'line-opacity', 0);
+    map.setFilter('roads-line', null);
+    this.stopDash(); this.clearPulse(); this.showMarkers([]);
+  }
+
+  applyWater() {
+    const map = this.map; if (!map || !map.getLayer('water-river')) return;
+    const on = this.state.layers.water && (this.inChapterScene() || this.state.scene === 'main');
+    map.setPaintProperty('water-river', 'line-opacity', on ? 0.95 : 0);
+    map.setPaintProperty('water-glow', 'line-opacity', on ? 0.4 : 0);
+    map.setPaintProperty('water-streams', 'line-opacity', on ? 0.7 : 0);
+    map.setPaintProperty('water-canal', 'line-opacity', on ? 0.85 : 0);
+    map.setPaintProperty('water-labels', 'text-opacity', on ? 1 : 0);
+  }
+  toggleWater() { this.setState((st) => ({ layers: { ...st.layers, water: !st.layers.water } })); this.applyWater(); }
+  lengthKm(coords) { let d = 0; for (let i = 1; i < coords.length; i++) d += this.km(coords[i - 1], coords[i]); return d; }
+  openWater(f) {
+    const p = f.properties || {}, coords = this.lineCoords(f.geometry);
+    const kind = p._wkind || p.waterway || 'stream';
+    const wkey = 'water:' + kind + ':' + (coords[0] ? coords[0].join(',') : '') + ':' + coords.length;
+    if (this._selKey === wkey) { this.closeSelection(); return; }
+    this._selKey = wkey;
+    let rows, title, kicker;
+    if (kind === 'river') {
+      const info = this.RIVER_INFO[p.name] || {};
+      title = p.name || 'River';
+      kicker = 'River — perennial watercourse';
+      const full = this.riverFC && this.riverFC.features ? this.lineCoords(this.riverFC.features[0].geometry) : coords;
+      rows = [];
+      if (info.also) rows.push({ label: 'Also known as', value: info.also });
+      if (info.part) rows.push({ label: 'Part of', value: info.part });
+      if (info.rises) rows.push({ label: 'Rises at', value: info.rises });
+      if (info.mouth) rows.push({ label: 'Flows to', value: info.mouth });
+      if (info.dir) rows.push({ label: 'Direction', value: info.dir });
+      rows.push({ label: 'Length', value: info.len || ('≈ ' + this.lengthKm(full).toFixed(1) + ' km') });
+      if (info.drains) rows.push({ label: 'Catchment', value: info.drains });
+      const wards = this.hasWards ? this.wardsForCoords(this.decimate(full, 300)) : null;
+      if (wards) rows.push({ label: 'Wards along its course', value: wards });
+      else if (info.downstream) rows.push({ label: 'Downstream', value: info.downstream });
+    } else {
+      const isCanal = kind === 'canal';
+      title = isCanal ? 'Irrigation canal' : 'Stream — tributary channel';
+      kicker = isCanal ? 'Canal — man-made channel' : 'Stream — natural watercourse';
+      const a = coords[0], b = coords[coords.length - 1];
+      const brg = coords.length > 1 ? this.bearing(a, b) : 0;
+      rows = [
+        { label: 'Type', value: isCanal ? (p.tunnel === 'culvert' ? 'Canal (culverted section)' : 'Open canal / channel') : (p.tunnel === 'culvert' ? 'Stream (culverted section)' : 'Natural stream') },
+        { label: 'Length', value: '≈ ' + this.lengthKm(coords).toFixed(2) + ' km' },
+        { label: 'Flows', value: this.compass((brg + 180) % 360) + ' → ' + this.compass(brg) },
+        { label: 'Part of', value: 'Killi / Karamana drainage — feeds the river network' },
+      ];
+      const w = this.hasWards ? this.wardsForCoords(coords) : null;
+      if (w) rows.push({ label: 'Ward', value: w });
+    }
+    this.setState({ detail: { kind: 'water', kicker, accent: '#1c6fb0', title, rows: rows.slice(0, 9) } });
+    this.drawSelRoute(f.geometry, '#1c6fb0');
+    if (coords.length) this.pulseAt(coords[Math.floor(coords.length / 2)], '#1c6fb0');
+  }
+
+  applyLayerVisibility() {
+    const map = this.map, L = this.state.layers, sc = this.state.scene;
+    if (!map || !map.getLayer('junction-dots')) return;
+    this.applyWater();
+    const pt = (layer, on) => { map.setPaintProperty(layer, 'circle-opacity', on ? 0.92 : 0); map.setPaintProperty(layer, 'circle-stroke-opacity', on ? 1 : 0); };
+    if (sc === 'ch5') {
+      if (map.getLayer('roads-line')) { map.moveLayer('roads-line'); }
+      if (map.getLayer('roads-glow')) map.moveLayer('roads-glow', 'roads-line');
+      map.moveLayer('boundary-line');
+      map.setPaintProperty('roads-line', 'line-opacity', L.contourRoads ? 0.65 : 0);
+      map.setLayoutProperty('road-labels', 'visibility', L.contourRoads ? 'visible' : 'none');
+      if (map.getLayer('contours-fill')) {
+        this.applyContourFilter();
+        if (map.getLayer('topo-base')) { map.setLayoutProperty('topo-base', 'visibility', L.contours ? 'visible' : 'none'); map.setPaintProperty('topo-base', 'fill-opacity', L.contours ? 0.92 : 0); }
+        ['contours-fill', 'contours-thin', 'contours-index', 'contours-labels'].forEach((l) => map.setLayoutProperty(l, 'visibility', L.contours ? 'visible' : 'none'));
+        map.setPaintProperty('contours-fill', 'line-opacity', L.contours ? 0.9 : 0);
+        map.setPaintProperty('contours-thin', 'line-opacity', L.contours ? 0.55 : 0);
+        map.setPaintProperty('contours-index', 'line-opacity', L.contours ? 0.95 : 0);
+        map.setPaintProperty('contours-labels', 'text-opacity', L.contours ? 1 : 0);
+      }
+      if (map.getLayer('wards-topo-line')) {
+        map.setPaintProperty('wards-topo-fill', 'fill-opacity', L.wardsTopo ? 0.07 : 0);
+        map.setPaintProperty('wards-topo-line', 'line-opacity', L.wardsTopo ? 0.5 : 0);
+      }
+      return;
+    }
+    pt('junction-dots', L.junctions); pt('stand-dots', L.stand); pt('stops-dots', L.stops);
+    if (sc === 'ch3') {
+      pt('stand-dots', false); pt('stops-dots', false);
+      map.setPaintProperty('rings-fill', 'fill-opacity', L.rings ? 0.06 : 0);
+      map.setPaintProperty('rings-line', 'line-opacity', L.rings ? 0.85 : 0);
+      map.setPaintProperty('tvm-radius-fill', 'fill-opacity', L.tvmRadius ? 0.13 : 0);
+      map.setPaintProperty('tvm-radius-line', 'line-opacity', L.tvmRadius ? 0.9 : 0);
+      pt('markets-dots', L.markets);
+      pt('dests-dots', L.dests);
+      map.setLayoutProperty('dests-labels', 'visibility', L.dests ? 'visible' : 'none');
+      this.showMarkers(this.ch3Markers());
+    }
+    if (sc === 'ch4') {
+      pt('stand-dots', false); pt('stops-dots', false);
+      if (map.getLayer('routes-line')) { map.setPaintProperty('routes-line', 'line-opacity', L.routes ? 0.95 : 0); map.setPaintProperty('routes-casing', 'line-opacity', L.routes ? 0.7 : 0); }
+      if (map.getLayer('wards-line')) map.setPaintProperty('wards-line', 'line-opacity', L.wards ? 0.7 : 0);
+      (this.touristMarkers || []).forEach((m) => L.tourist ? m._show() : m._hide());
+      map.setPaintProperty('roads-line', 'line-opacity', 0.35);
+    }
+  }
+
+  applyContourFilter() {
+    const map = this.map, L = this.state.layers;
+    if (!map.getLayer('contours-fill')) return;
+    const ranges = this.CONTOUR_BANDS.filter((b) => L[b.k]).map((b) => ['all', ['>=', ['coalesce', ['get', 'ELEV'], 40], b.min], ['<', ['coalesce', ['get', 'ELEV'], 40], b.max]]);
+    const bf = ranges.length ? ['any', ...ranges] : ['==', 1, 0];
+    map.setFilter('contours-fill', bf);
+    map.setFilter('contours-thin', ['all', ['!=', ['get', '10NS'], 1], bf]);
+    map.setFilter('contours-index', ['all', ['==', ['get', '10NS'], 1], bf]);
+    map.setFilter('contours-labels', ['all', ['>', ['coalesce', ['get', 'LABEL'], 0], 0], bf]);
+  }
+
+  pickPeriod(i) { this.setState({ period: i }); this.applyPeriod(i); }
+  applyPeriod(i) {
+    const map = this.map, act = this.PERIODS[i].act;
+    this.hideImgPopup();
+    this.setState({ detail: { kicker: this.PERIODS[i].years, accent: '#8E1F12', title: this.PERIODS[i].title, rows: [{ label: 'Interpretive note', value: this.PERIODS[i].note }] } });
+    map.setFilter('roads-line', null); map.setPaintProperty('flows-line', 'line-opacity', 0); this.stopDash(); this.showMarkers([]);
+    const early = act === 'trails' || act === 'palace' || act === 'flows' || act === 'market';
+    if (map.getLayer('forest-fill')) { map.setPaintProperty('forest-base', 'fill-opacity', early ? 0.5 : 0); map.setPaintProperty('forest-fill', 'fill-opacity', early ? 0.85 : 0); }
+    map.setPaintProperty('flows-line', 'line-width', early ? 3.4 : 3);
+    this.stopRoadBlink();
+    if (map.getLayer('chantha-fill')) { map.setPaintProperty('chantha-fill', 'fill-opacity', 0); map.setPaintProperty('chantha-line', 'line-opacity', 0); }
+    const dimRoads = (op) => map.setPaintProperty('roads-line', 'line-opacity', op);
+    if (act === 'trails') { dimRoads(0); this.startRoadBlink(); map.setPaintProperty('flows-line', 'line-opacity', 0.4); map.flyTo({ center: [77.005, 8.612], zoom: 12.2, pitch: 45, bearing: -15, duration: 2800, curve: 1.15, essential: true }); }
+    else if (act === 'palace') { dimRoads(0.15); this.showMarkers(['palace']); map.flyTo({ center: [77.002896, 8.609251], zoom: 15.4, pitch: 45, bearing: 10, duration: 3000, curve: 1.15, essential: true }); }
+    else if (act === 'flows') { dimRoads(0.12); map.setPaintProperty('flows-line', 'line-opacity', 0.95); this.startDash('flows-line'); this.showMarkers(['palace', 'market']); map.fitBounds([[76.90, 8.44], [77.34, 8.98]], { padding: 90, pitch: 30, bearing: 0, duration: 3200, essential: true }); }
+    else if (act === 'market') { dimRoads(0.2); this.showMarkers(['market']); if (map.getLayer('chantha-fill')) { map.setPaintProperty('chantha-fill', 'fill-opacity', 0.4); map.setPaintProperty('chantha-line', 'line-opacity', 0.95); } map.flyTo({ center: [77.00231, 8.60230], zoom: 16.2, pitch: 45, bearing: -20, duration: 3000, curve: 1.15, essential: true }); }
+    else if (act === 'sh') { map.setFilter('roads-line', ['in', ['get', '_class'], ['literal', ['nh', 'sh']]]); dimRoads(0.95); map.flyTo({ center: [77.000, 8.610], zoom: 12.4, pitch: 35, bearing: 0, duration: 2800, curve: 1.15, essential: true }); }
+    else if (act === 'all') { dimRoads(0.9); this.showMarkers(['market']); if (map.getLayer('chantha-fill')) { map.setPaintProperty('chantha-line', 'line-opacity', 0.5); } map.flyTo({ center: [77.002, 8.608], zoom: 12.6, pitch: 40, bearing: -12, duration: 2800, curve: 1.15, essential: true }); }
+    else if (act === 'modern') { dimRoads(0.9); map.setPaintProperty('junction-dots', 'circle-opacity', 0.92); map.setPaintProperty('junction-dots', 'circle-stroke-opacity', 1); map.flyTo({ center: [76.995, 8.602], zoom: 12.3, pitch: 45, bearing: 15, duration: 3000, curve: 1.15, essential: true }); }
+  }
+  startDash(layer) {
+    this.stopDash(); this._dashLayer = layer;
+    const seq = [[0, 1.4, 1.8], [0.4, 1.4, 1.4], [0.8, 1.4, 1.0], [1.2, 1.4, 0.6], [1.6, 1.4, 0.2], [1.8, 1.4, 1.8], [1.4, 1.4, 1.8], [1.0, 1.4, 1.8], [0.6, 1.4, 1.8], [0.2, 1.4, 1.8]];
+    let step = 0, last = 0;
+    const tick = (ts) => { if (this._dead || !this._dashOn || !this.map.getLayer(this._dashLayer)) return; if (ts - last > 55) { last = ts; step = (step + 1) % seq.length; this.map.setPaintProperty(this._dashLayer, 'line-dasharray', seq[step]); } this._dashRaf = requestAnimationFrame(tick); };
+    this._dashOn = true; this._dashRaf = requestAnimationFrame(tick);
+  }
+  stopDash() { this._dashOn = false; cancelAnimationFrame(this._dashRaf); }
+  startRoadBlink() {
+    this.stopRoadBlink(); this._roadBlinkOn = true; const t0 = performance.now();
+    const tick = (ts) => { if (this._dead || !this._roadBlinkOn || !this.map.getLayer('roads-line')) return; const s = Math.max(0, Math.sin((ts - t0) / 520)); this.map.setPaintProperty('roads-line', 'line-opacity', 0.06 + 0.2 * s); this._roadBlinkRaf = requestAnimationFrame(tick); };
+    this._roadBlinkRaf = requestAnimationFrame(tick);
+  }
+  stopRoadBlink() { this._roadBlinkOn = false; cancelAnimationFrame(this._roadBlinkRaf); }
+
+  toggleProposed() { const on = !this.state.proposedOnly; this.setState({ proposedOnly: on }); this.applyProposed(on); }
+  applyProposed(on) {
+    const map = this.map; if (!map || !map.getLayer('orr-line')) return;
+    if (on) {
+      this.closeSelection();
+      map.setPaintProperty('roads-line', 'line-opacity', 0.05);
+      if (map.getLayer('road-labels')) map.setLayoutProperty('road-labels', 'visibility', 'none');
+      if (map.getLayer('routes-line')) { map.setPaintProperty('routes-line', 'line-opacity', 0.06); map.setPaintProperty('routes-casing', 'line-opacity', 0); }
+      ['orr-glow', 'orr-casing', 'orr-line', 'orr-labels'].forEach((l) => map.moveLayer(l));
+      map.setPaintProperty('orr-glow', 'line-opacity', 0.5);
+      map.setPaintProperty('orr-casing', 'line-opacity', 0.9);
+      map.setPaintProperty('orr-line', 'line-opacity', 1);
+      map.setLayoutProperty('orr-labels', 'visibility', 'visible');
+      this.startDash('orr-line');
+      if (this._orrBounds) map.fitBounds(this._orrBounds, { padding: { top: 120, bottom: 120, left: this.state.hideUI ? 120 : 380, right: 120 }, pitch: 0, bearing: 0, duration: 2600, essential: true });
+    } else {
+      ['orr-glow', 'orr-casing', 'orr-line'].forEach((l) => map.setPaintProperty(l, 'line-opacity', 0));
+      map.setLayoutProperty('orr-labels', 'visibility', 'none');
+      this.stopDash();
+      const sc = this.state.scene;
+      map.setPaintProperty('roads-line', 'line-opacity', sc === 'ch5' ? (this.state.layers.contourRoads ? 0.65 : 0) : (sc === 'ch4' ? 0.35 : 0.9));
+      if (map.getLayer('road-labels') && sc !== 'ch5') map.setLayoutProperty('road-labels', 'visibility', 'visible');
+      this.applyLayerVisibility();
+    }
+  }
+  toggleHideUI() { this.setState((st) => ({ hideUI: !st.hideUI })); requestAnimationFrame(() => { this.map && this.map.resize(); this.updateMapTools(); }); }
+  openVideoMode() { this.setState({ videoMode: true }); requestAnimationFrame(() => this.initVideos()); }
+  closeVideoMode() { this.setState({ videoMode: false }); }
+  initVideos() {
+    this._vids = [0, 1, 2].map((i) => document.getElementById('hv' + i)).filter(Boolean);
+    if (!this._vids.length) return;
+    this._vdur = this._vids.map(() => 0);
+    this._vids.forEach((v, i) => { const set = () => { this._vdur[i] = v.duration || 0; }; if (v.readyState >= 1) set(); else v.addEventListener('loadedmetadata', set, { once: true }); v.pause(); });
+    this.scrubVideo(this.state.videoT);
+  }
+  scrubVideo(frac) {
+    frac = Math.max(0, Math.min(1, frac));
+    const vids = this._vids || [];
+    if (!vids.length) { this.setState({ videoT: frac }); return; }
+    const dur = (this._vdur && this._vdur.some((d) => d > 0)) ? this._vdur.map((d) => d || 0.001) : vids.map(() => 1);
+    const total = dur.reduce((a, b) => a + b, 0) || vids.length;
+    let g = frac * total, seg = 0;
+    while (seg < vids.length - 1 && g > dur[seg]) { g -= dur[seg]; seg++; }
+    vids.forEach((v, i) => { v.style.opacity = i === seg ? '1' : '0'; });
+    const v = vids[seg];
+    try { v.pause(); v.currentTime = Math.min(g, Math.max(0, (dur[seg] || 0) - 0.03)); } catch (e) {}
+    this.setState({ videoT: frac });
+  }
+  niceRound(x) { const p = Math.pow(10, Math.floor(Math.log10(x))); const f = x / p; const n = f >= 5 ? 5 : f >= 2 ? 2 : 1; return n * p; }
+  updateMapTools() {
+    const map = this.map; if (!map) return;
+    const arrow = document.getElementById('atlas-north-arrow');
+    if (arrow) arrow.style.transform = 'rotate(' + (-map.getBearing()) + 'deg)';
+    const bar = document.getElementById('atlas-scale-bar'), lbl = document.getElementById('atlas-scale-label');
+    if (bar && lbl) {
+      const y = map.getContainer().clientHeight / 2, maxPx = 104;
+      const d = map.unproject([0, y]).distanceTo(map.unproject([maxPx, y]));
+      if (d > 0 && isFinite(d)) { const nice = this.niceRound(d); bar.style.width = Math.round(maxPx * nice / d) + 'px'; lbl.textContent = nice >= 1000 ? (nice / 1000) + ' km' : Math.round(nice) + ' m'; }
+    }
+  }
+  startDrift() {
+    if ((this.props.cameraDrift ?? true) === false) return;
+    const spin = () => { if (this._dead || this.state.scene !== 'landing') return; this.map.rotateTo(this.map.getBearing() + 30, { duration: 60000, easing: (t) => t }); this._spinT = setTimeout(spin, 60000); };
+    this._spinT = setTimeout(spin, 5500);
+  }
+}
+</script>
+</body>
+</html>
