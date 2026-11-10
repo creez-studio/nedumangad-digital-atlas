@@ -301,7 +301,7 @@ body.is-ready #loader{opacity:0;visibility:hidden}
 .cta.ghost:hover{background:var(--ink);color:#fff}
 #skip{position:fixed;right:28px;bottom:32px;z-index:60;padding:13px 22px;border-radius:999px;background:var(--ink);color:#fff;font:600 12px var(--sans);letter-spacing:.16em;text-transform:uppercase;box-shadow:0 14px 40px -12px rgba(10,31,77,.55);transition:background .3s}
 #skip:hover{background:var(--hot)} #skip span{margin-left:8px}
-#keymap{position:fixed;right:376px;bottom:284px;z-index:18;width:176px;padding:10px 10px 8px;border-radius:14px;background:var(--glass);backdrop-filter:blur(14px);border:1px solid #fff;outline:1px solid var(--line);pointer-events:none;transition:opacity .5s}
+#keymap{display:none!important;position:fixed;right:376px;bottom:284px;z-index:18;width:176px;padding:10px 10px 8px;border-radius:14px;background:var(--glass);backdrop-filter:blur(14px);border:1px solid #fff;outline:1px solid var(--line);pointer-events:none;transition:opacity .5s}
 body.is-hero #keymap,body.is-micro #keymap{opacity:0}
 #keymap svg{display:block;width:100%;height:auto}
 #keymap .km-t{display:flex;justify-content:space-between;align-items:baseline;font:600 9.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px}
