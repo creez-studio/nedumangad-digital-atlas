@@ -184,8 +184,8 @@ export async function initMap() {
     container: 'map', center: [77.01, 8.61], zoom: 12.6, pitch: 62, bearing: -28, maxPitch: 78, antialias: true,
     attributionControl: false,
     style: { version: 8, glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
-      sources: { carto: { type: 'raster', tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap contributors © CARTO',
-        tiles: ['a', 'b', 'c'].map((s) => `https://${s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png`) } },
+      sources: { carto: { type: 'raster', tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap contributors',
+        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'] } },
       layers: [{ id: 'bg', type: 'background', paint: { 'background-color': C.paper } },
         { id: 'carto', type: 'raster', source: 'carto', paint: { 'raster-opacity': .5, 'raster-saturation': -1, 'raster-contrast': .08, 'raster-opacity-transition': T(900) } }] },
   });
