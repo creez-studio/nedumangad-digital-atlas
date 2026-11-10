@@ -1,0 +1,1 @@
+{"area_km2":32.24,"buildings":29307,"built_ha":220.1,"built_pct":6.8,"canopies":6086,"water_km":46.2,"elev_min":40,"elev_max":210,"elev_mean":90,"bands":[{"lo":0,"hi":60,"pct":5.4},{"lo":60,"hi":100,"pct":62.1},{"lo":100,"hi":140,"pct":29.4},{"lo":140,"hi":400,"pct":3.2}],"road_km":{"loc":149.8,"mun":52.1,"sh":27.1,"mdr":31.0,"prop":35.2},"wards":42,"bridges":184}

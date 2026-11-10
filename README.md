@@ -86,3 +86,54 @@ What differs from the main atlas:
 Note for anyone editing the widths: `line-width` will not accept runtime `+`/`*`
 next to a zoom `interpolate`, so all arithmetic is done in JS and the style only
 ever sees a plain ramp over per-class constants.
+
+## v3 — Macro → Micro Atlas
+
+`v3/` is a self-contained rebuild, served at
+<https://creez-studio.github.io/nedumangad-digital-atlas/v3/>. Study and drawing by
+**Irfan, Haron and Advin**.
+
+- **Blue-and-white axonometric language** with contrast accents and a legend on every
+  chapter; custom cursor, cursor-reactive title, lens and section.
+- **Macro (MapLibre)** — network, a redesigned historical evolution (the town grows out of
+  a 3D forest, epoch by epoch), access, wards, topography with a section that follows the
+  cursor, and an ecology chapter with a live ground-reading lens.
+- **Micro (Three.js)** — the 372 × 759 m design stretch built from `road.dwg`: existing
+  versus redesigned road with a sweep-in animation, measured cross-sections, frontage
+  impact, heritage buildings, the new market proposal (exploded floors), terrain and a
+  long section, plus detailed models of Koyikkal Palace, the KSRTC bus stand, the market
+  and the court.
+
+Libraries and fonts are vendored in `v3/vendor/`, so only the basemap tiles need a network.
+
+```bash
+python3 -m http.server 8000      # from the repo root
+# open http://localhost:8000/v3/
+```
+
+Rebuilding the data (Python 3 with `shapely`, `scipy`, `numpy`):
+
+```bash
+python3 tools/build_v3_macro.py     # slims data/*.geojson into v3/data, DEM grid, statistics
+python3 tools/build_v3_stretch.py   # tools/cad/road_flat.json -> v3/data/stretch.json
+```
+
+`tools/cad/road_flat.json` is `road.dwg` converted with LibreDWG (`dwg2dxf`) and flattened
+per layer with `ezdxf`. The drawing is tied to the stretch boundary by a translation fitted
+against the OSM centrelines (mean residual about 2.5 m).
+
+Values tagged **verify** in the interface are drafted assumptions (existing road widths,
+crossing and parking condition, heritage attributes, the court's position) to be replaced
+with field-survey figures. Building heights and growth epochs are derived, and the landmark
+models are interpretive massing rather than measured drawings.
+
+
+### v3.1 — terrain, traffic and concept update
+
+- **Hero**: title on one line; "Skip intro" on the first page and a Skip button (or Esc) during the locate and stretch-approach animations.
+- **Design stretch on real ground**: `tools/build_v3_stretch.py` fits a thin-plate spline to the 2 m contours in `road.dwg` (4 m grid, true vertical scale). Roads, footpaths, buildings, trees, vehicles and landmarks are draped on it; the site reads as a cut terrain block. The OSM stream in the north-east corner is carved in and the roads bridge it with parapets.
+- **Court**: CAD footprints 261 and 337 are modelled as the court complex (front range + main block).
+- **Traffic**: vehicles follow lane lines derived from the carriageway polygons (keep-left), follow the vehicle ahead, stop at signals and give way at the roundabout. Signals, stop lines and zebra crossings at three junctions are an atlas proposal, not part of `road.dwg`.
+- **Road joints**: existing lanes that meet the redesigned roads are kept and run into the new kerb line with dropped kerbs and give-way lines.
+- **Skywalk ring**: conceptual elevated ring over Market junction with links into the frontages.
+- **Macro**: watercourses are polygons whose width grows downstream; road widths are metric (SH 10 m, MDR 7.5 m, municipal 5.5 m, local 3.6 m) plus a legibility floor; every road–water crossing is a raised 3D deck; a key map (Kerala > district > taluk > municipality) with scale bar and north; a soft relief base under the town.
